@@ -1,0 +1,26 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Packaging and build output
+build/
+dist/
+*.spec
+
+# IDE and local tooling
+.vscode/
+.idea/
+*.code-workspace
+
+# Local environment and test artifacts
+.env
+.coverage
+htmlcov/
+
