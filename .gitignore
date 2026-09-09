@@ -13,6 +13,7 @@ env/
 build/
 dist/
 *.spec
+*.egg-info/
 
 # IDE and local tooling
 .vscode/
@@ -23,4 +24,3 @@ dist/
 .env
 .coverage
 htmlcov/
-

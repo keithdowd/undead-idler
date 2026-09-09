@@ -40,6 +40,12 @@ Run the test suite from an activated virtual environment:
 python -m pytest
 ```
 
+Run the application from the activated virtual environment after the application entry point is implemented:
+
+```powershell
+python -m undead_idler
+```
+
 Use the project metadata and requirements file as the source of truth for the supported Python and dependency versions.
 
 ## Implementation Workflow
@@ -72,4 +78,3 @@ Do not combine unrelated tasks in one commit. Do not amend an existing task comm
 ## Baseline Commit
 
 The initial baseline commit contains the approved planning documents, project workflow, dependency files, project metadata, and Git ignore rules. It does not contain implementation code or the virtual environment.
-

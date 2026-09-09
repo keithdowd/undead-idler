@@ -12,7 +12,7 @@ Status values:
 
 ### UI-001 Create Python project metadata
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: None
 - Define the project in `pyproject.toml`.
 - Declare Python compatibility as `>=3.11`.
@@ -376,4 +376,3 @@ Project foundation
 ```
 
 The custom icon task can proceed in parallel with the input adapter and activity controller, but it must be complete before final packaging.
-
