@@ -45,7 +45,7 @@ Completion criteria: a development command launches the application and exits wi
 
 ### WIN-001 Define SendInput ctypes structures
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: UI-002
 - Define the Windows structures required by `user32.SendInput`.
 - Define keyboard input constants and the F15 virtual-key code.
