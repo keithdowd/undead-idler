@@ -11,6 +11,12 @@ dependencies = [
     "PySide6==6.11.0",
 ]
 
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"

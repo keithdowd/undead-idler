@@ -1,0 +1,2 @@
+"""Undead Idler application package."""
+

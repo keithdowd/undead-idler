@@ -23,7 +23,7 @@ Completion criteria: the project can be installed in a clean Windows virtual env
 
 ### UI-002 Create source and test layout
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: UI-001
 - Create the `src/undead_idler` package.
 - Create the initial `tests` package.
