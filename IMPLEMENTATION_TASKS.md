@@ -33,7 +33,7 @@ Completion criteria: the package imports successfully and the test runner discov
 
 ### UI-003 Create minimal Qt application
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: UI-002
 - Create a minimal `QApplication` startup path.
 - Start and stop the Qt event loop cleanly.
