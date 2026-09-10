@@ -1,5 +1,11 @@
 import pytest
-from PySide6.QtWidgets import QApplication, QDialogButtonBox, QLabel, QLineEdit
+from PySide6.QtWidgets import (
+    QApplication,
+    QDialog,
+    QDialogButtonBox,
+    QLabel,
+    QLineEdit,
+)
 
 from undead_idler.settings_dialog import IntervalSettingsDialog
 
@@ -25,3 +31,26 @@ def test_settings_dialog_has_save_and_cancel_actions(qapp):
     assert buttons.button(QDialogButtonBox.StandardButton.Save) is not None
     assert buttons.button(QDialogButtonBox.StandardButton.Cancel) is not None
 
+
+@pytest.mark.parametrize("value", ["", "abc", "5.5", "0", "11"])
+def test_settings_dialog_rejects_invalid_interval(qapp, value):
+    dialog = IntervalSettingsDialog(5)
+    dialog.interval_input.setText(value)
+    dialog.findChild(QDialogButtonBox, "settings_buttons").button(
+        QDialogButtonBox.StandardButton.Save
+    ).click()
+
+    assert dialog.result() == QDialog.DialogCode.Rejected
+    assert dialog.interval_minutes == 5
+    assert dialog.validation_message.text() == "Enter a whole number from 1 to 10 minutes."
+
+
+def test_settings_dialog_accepts_valid_interval(qapp):
+    dialog = IntervalSettingsDialog(5)
+    dialog.interval_input.setText("7")
+    dialog.findChild(QDialogButtonBox, "settings_buttons").button(
+        QDialogButtonBox.StandardButton.Save
+    ).click()
+
+    assert dialog.result() == QDialog.DialogCode.Accepted
+    assert dialog.interval_minutes == 7

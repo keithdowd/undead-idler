@@ -197,7 +197,7 @@ Completion criteria: the dialog opens with the current interval and contains no 
 
 ### SET-002 Add interval validation
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: SET-001
 - Reject empty values.
 - Reject non-numeric values.
