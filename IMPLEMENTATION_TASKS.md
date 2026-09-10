@@ -345,7 +345,7 @@ Completion criteria: the single executable launches and passes the core workflow
 
 ### QA-004 Write user documentation
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: QA-002
 - Document manual launch.
 - Document Start, Stop, Settings, and Exit.
