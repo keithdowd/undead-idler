@@ -5,6 +5,7 @@ from undead_idler.activity_controller import (
     InvalidActivityTransition,
 )
 from undead_idler.models import ActivityState
+from undead_idler.settings_controller import RuntimeSettings
 from undead_idler.win_input import InputResult
 
 
@@ -21,15 +22,59 @@ def failed_input():
     )
 
 
+class FakeSignal:
+    def __init__(self):
+        self._callbacks = []
+
+    def connect(self, callback):
+        self._callbacks.append(callback)
+
+    def emit(self):
+        for callback in self._callbacks:
+            callback()
+
+
+class FakeTimer:
+    def __init__(self):
+        self.timeout = FakeSignal()
+        self._interval = 0
+        self._active = False
+
+    def setInterval(self, interval):
+        self._interval = interval
+
+    def interval(self):
+        return self._interval
+
+    def start(self):
+        self._active = True
+
+    def stop(self):
+        self._active = False
+
+    def isActive(self):
+        return self._active
+
+
+def make_controller(input_sender=successful_input, settings=None, timer=None):
+    return ActivityController(
+        input_sender=input_sender,
+        settings=settings,
+        timer=timer or FakeTimer(),
+    )
+
+
 def test_controller_starts_stopped():
-    controller = ActivityController()
+    controller = make_controller()
 
     assert controller.state is ActivityState.STOPPED
 
 
 def test_state_changes_emit_once_and_repeated_start_is_idempotent():
     calls = []
-    controller = ActivityController(input_sender=lambda: calls.append(True) or successful_input())
+    controller = make_controller(
+        input_sender=lambda: calls.append(True) or successful_input()
+    )
     changes = []
     controller.state_changed.connect(changes.append)
 
@@ -42,7 +87,7 @@ def test_state_changes_emit_once_and_repeated_start_is_idempotent():
 
 
 def test_running_activity_can_stop_or_fail_and_error_can_retry():
-    controller = ActivityController(input_sender=successful_input)
+    controller = make_controller(input_sender=successful_input)
 
     controller.start()
     assert controller.fail() is True
@@ -54,7 +99,7 @@ def test_running_activity_can_stop_or_fail_and_error_can_retry():
 
 
 def test_invalid_transition_is_rejected():
-    controller = ActivityController(input_sender=successful_input)
+    controller = make_controller(input_sender=successful_input)
 
     with pytest.raises(InvalidActivityTransition):
         controller.fail()
@@ -62,7 +107,9 @@ def test_invalid_transition_is_rejected():
 
 def test_start_sends_immediately_and_records_success_timestamp():
     calls = []
-    controller = ActivityController(input_sender=lambda: calls.append(True) or successful_input())
+    controller = make_controller(
+        input_sender=lambda: calls.append(True) or successful_input()
+    )
 
     assert controller.start() is True
     assert calls == [True]
@@ -72,9 +119,50 @@ def test_start_sends_immediately_and_records_success_timestamp():
 
 
 def test_failed_initial_keypress_does_not_start_or_record_timestamp():
-    controller = ActivityController(input_sender=failed_input)
+    controller = make_controller(input_sender=failed_input)
 
     assert controller.start() is False
     assert controller.state is ActivityState.STOPPED
     assert controller.last_input_result.error_message == "input blocked"
     assert controller.last_successful_keypress is None
+
+
+def test_start_configures_and_starts_one_timer():
+    timer = FakeTimer()
+    settings = RuntimeSettings()
+    settings.set_interval(2)
+    controller = make_controller(settings=settings, timer=timer)
+
+    assert controller.start() is True
+    assert timer.interval() == 2 * 60 * 1000
+    assert timer.isActive() is True
+
+
+def test_timer_timeout_submits_one_repeated_keypress():
+    calls = []
+    timer = FakeTimer()
+    controller = make_controller(
+        input_sender=lambda: calls.append(True) or successful_input(),
+        timer=timer,
+    )
+
+    controller.start()
+    timer.timeout.emit()
+
+    assert calls == [True, True]
+
+
+def test_stop_deactivates_timer_and_ignores_later_timeout():
+    calls = []
+    timer = FakeTimer()
+    controller = make_controller(
+        input_sender=lambda: calls.append(True) or successful_input(),
+        timer=timer,
+    )
+
+    controller.start()
+    controller.stop()
+    timer.timeout.emit()
+
+    assert timer.isActive() is False
+    assert calls == [True]

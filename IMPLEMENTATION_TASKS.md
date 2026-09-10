@@ -127,7 +127,7 @@ Completion criteria: Start never waits for the first interval before attempting 
 
 ### ACT-004 Implement repeating QTimer behavior
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: ACT-003
 - Start a QTimer after a successful initial keypress.
 - Convert the whole-minute interval to milliseconds.

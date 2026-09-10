@@ -5,9 +5,10 @@ from __future__ import annotations
 from collections.abc import Callable
 from datetime import datetime
 
-from PySide6.QtCore import QObject, Signal
+from PySide6.QtCore import QObject, QTimer, Signal
 
 from .models import ActivityState
+from .settings_controller import RuntimeSettings
 from .win_input import InputResult, send_f15_keypress_with_result
 
 
@@ -32,11 +33,16 @@ class ActivityController(QObject):
     def __init__(
         self,
         input_sender: InputSender = send_f15_keypress_with_result,
+        settings: RuntimeSettings | None = None,
+        timer: QTimer | None = None,
         parent: QObject | None = None,
     ) -> None:
         super().__init__(parent)
         self._state = ActivityState.STOPPED
         self._input_sender = input_sender
+        self._settings = settings or RuntimeSettings()
+        self._timer = timer if timer is not None else QTimer(self)
+        self._timer.timeout.connect(self._on_timer_timeout)
         self._consecutive_failures = 0
         self._last_input_result: InputResult | None = None
         self._last_successful_keypress: datetime | None = None
@@ -67,6 +73,8 @@ class ActivityController(QObject):
             )
 
         self._state = state
+        if state is not ActivityState.RUNNING:
+            self._timer.stop()
         self.state_changed.emit(state)
         return True
 
@@ -82,7 +90,10 @@ class ActivityController(QObject):
             return False
 
         self._last_successful_keypress = datetime.now()
-        return self.transition_to(ActivityState.RUNNING)
+        changed = self.transition_to(ActivityState.RUNNING)
+        self._timer.setInterval(self._settings.interval_minutes * 60 * 1000)
+        self._timer.start()
+        return changed
 
     def stop(self) -> bool:
         """Transition to the stopped state."""
@@ -91,3 +102,13 @@ class ActivityController(QObject):
     def fail(self) -> bool:
         """Transition to the error state."""
         return self.transition_to(ActivityState.ERROR)
+
+    def _on_timer_timeout(self) -> None:
+        """Submit one repeated keypress while activity is running."""
+        if self._state is not ActivityState.RUNNING:
+            return
+
+        result = self._input_sender()
+        self._last_input_result = result
+        if result.success:
+            self._last_successful_keypress = datetime.now()
