@@ -168,6 +168,7 @@ def test_stop_deactivates_timer_and_ignores_later_timeout():
     timer.timeout.emit()
 
     assert timer.isActive() is False
+    assert controller.consecutive_failures == 0
     assert calls == [True]
 
 
@@ -243,3 +244,35 @@ def test_start_retries_after_automatic_error():
     assert controller.state is ActivityState.RUNNING
     assert controller.consecutive_failures == 0
     assert controller.error_message is None
+
+
+def test_stop_resets_failure_state_but_preserves_successful_timestamp():
+    results = iter([successful_input(), failed_input(), failed_input()])
+    timer = FakeTimer()
+    controller = make_controller(input_sender=lambda: next(results), timer=timer)
+
+    controller.start()
+    timestamp = controller.last_successful_keypress
+    timer.timeout.emit()
+    timer.timeout.emit()
+    assert controller.consecutive_failures == 2
+
+    controller.stop()
+
+    assert controller.state is ActivityState.STOPPED
+    assert controller.consecutive_failures == 0
+    assert controller.error_message is None
+    assert controller.last_successful_keypress is timestamp
+    assert timer.isActive() is False
+
+
+def test_shutdown_stops_active_timer_and_is_safe_to_repeat():
+    timer = FakeTimer()
+    controller = make_controller(timer=timer)
+
+    controller.start()
+    controller.shutdown()
+    controller.shutdown()
+
+    assert controller.state is ActivityState.STOPPED
+    assert timer.isActive() is False

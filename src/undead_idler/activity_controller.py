@@ -115,8 +115,15 @@ class ActivityController(QObject):
         return changed
 
     def stop(self) -> bool:
-        """Transition to the stopped state."""
+        """Stop activity and reset transient failure state."""
+        self._timer.stop()
+        self._consecutive_failures = 0
+        self._error_message = None
         return self.transition_to(ActivityState.STOPPED)
+
+    def shutdown(self) -> None:
+        """Stop activity before the owning application exits."""
+        self.stop()
 
     def fail(self) -> bool:
         """Transition to the error state."""

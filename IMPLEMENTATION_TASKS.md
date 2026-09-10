@@ -161,7 +161,7 @@ Completion criteria: three consecutive failures stop activity and produce an obs
 
 ### ACT-007 Implement Stop and cleanup behavior
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: ACT-004, ACT-006
 - Stop the timer immediately.
 - Reset the consecutive-failure counter.
