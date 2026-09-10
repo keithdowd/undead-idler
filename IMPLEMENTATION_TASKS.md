@@ -335,7 +335,7 @@ Completion criteria: the packaged application satisfies the observable PRD accep
 
 ### QA-003 Test supported Windows versions
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: PKG-003, QA-002
 - Test on Windows 10 where available.
 - Test on Windows 11.
