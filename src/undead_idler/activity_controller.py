@@ -24,6 +24,7 @@ class ActivityController(QObject):
 
     state_changed = Signal(object)
     last_successful_keypress_changed = Signal(object)
+    interval_changed = Signal(int)
 
     _allowed_transitions = {
         ActivityState.STOPPED: {ActivityState.RUNNING},
@@ -137,6 +138,8 @@ class ActivityController(QObject):
             self._timer.stop()
             self._timer.setInterval(interval_minutes * 60 * 1000)
             self._timer.start()
+        if interval_minutes != previous_interval:
+            self.interval_changed.emit(interval_minutes)
 
     def shutdown(self) -> None:
         """Stop activity before the owning application exits."""

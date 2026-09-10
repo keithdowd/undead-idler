@@ -209,7 +209,7 @@ Completion criteria: only valid whole-minute values can be saved.
 
 ### SET-003 Connect settings to activity controller
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: SET-002, ACT-008
 - Apply valid changes to the activity controller.
 - Refresh the tray tooltip after saving.

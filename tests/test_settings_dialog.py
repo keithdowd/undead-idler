@@ -8,6 +8,9 @@ from PySide6.QtWidgets import (
 )
 
 from undead_idler.settings_dialog import IntervalSettingsDialog
+from undead_idler.settings_dialog import apply_interval_dialog
+from undead_idler.activity_controller import ActivityController
+from undead_idler.win_input import InputResult
 
 
 @pytest.fixture
@@ -54,3 +57,33 @@ def test_settings_dialog_accepts_valid_interval(qapp):
 
     assert dialog.result() == QDialog.DialogCode.Accepted
     assert dialog.interval_minutes == 7
+
+
+def test_accepted_settings_apply_to_controller(qapp):
+    controller = ActivityController(
+        input_sender=lambda: InputResult(True, 2, 2),
+    )
+    dialog = IntervalSettingsDialog(controller.interval_minutes)
+    dialog.interval_input.setText("7")
+    dialog.findChild(QDialogButtonBox, "settings_buttons").button(
+        QDialogButtonBox.StandardButton.Save
+    ).click()
+
+    assert apply_interval_dialog(controller, dialog) is True
+    assert controller.interval_minutes == 7
+
+
+def test_canceled_settings_leave_controller_unchanged(qapp, monkeypatch):
+    controller = ActivityController(
+        input_sender=lambda: InputResult(True, 2, 2),
+    )
+    dialog = IntervalSettingsDialog(controller.interval_minutes)
+    dialog.interval_input.setText("7")
+    monkeypatch.setattr(
+        dialog,
+        "exec",
+        lambda: QDialog.DialogCode.Rejected,
+    )
+
+    assert apply_interval_dialog(controller, dialog) is False
+    assert controller.interval_minutes == 5

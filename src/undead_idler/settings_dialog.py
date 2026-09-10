@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
     QFormLayout,
     QLabel,
     QLineEdit,
+    QWidget,
 )
 
 from .settings_controller import InvalidInterval, RuntimeSettings
@@ -80,3 +81,21 @@ class IntervalSettingsDialog(QDialog):
 
         self._saved_interval = interval
         self.accept()
+
+
+def apply_interval_dialog(activity_controller, dialog: IntervalSettingsDialog) -> bool:
+    """Apply an accepted dialog value and return whether it was saved."""
+    result = dialog.result()
+    if result == 0:
+        result = dialog.exec()
+    if result != QDialog.DialogCode.Accepted:
+        return False
+
+    activity_controller.set_interval(dialog.interval_minutes)
+    return True
+
+
+def open_interval_settings(activity_controller, parent: QWidget | None = None) -> bool:
+    """Open interval settings and apply the value when the user saves it."""
+    dialog = IntervalSettingsDialog(activity_controller.interval_minutes, parent)
+    return apply_interval_dialog(activity_controller, dialog)

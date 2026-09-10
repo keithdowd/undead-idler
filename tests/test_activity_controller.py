@@ -342,3 +342,13 @@ def test_unchanged_running_interval_does_not_restart_timer():
     controller.set_interval(5)
 
     assert timer.start_count == original_start_count
+
+
+def test_interval_change_emits_new_interval():
+    controller = make_controller()
+    changes = []
+    controller.interval_changed.connect(changes.append)
+
+    controller.set_interval(7)
+
+    assert changes == [7]
