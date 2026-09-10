@@ -45,6 +45,7 @@ class ActivityController(QObject):
         self._timer = timer if timer is not None else QTimer(self)
         self._timer.timeout.connect(self._on_timer_timeout)
         self._consecutive_failures = 0
+        self._error_message: str | None = None
         self._last_input_result: InputResult | None = None
         self._last_successful_keypress: datetime | None = None
 
@@ -57,6 +58,16 @@ class ActivityController(QObject):
     def last_input_result(self) -> InputResult | None:
         """Return the most recent input submission result."""
         return self._last_input_result
+
+    @property
+    def consecutive_failures(self) -> int:
+        """Return the number of consecutive failed submissions."""
+        return self._consecutive_failures
+
+    @property
+    def error_message(self) -> str | None:
+        """Return the latest local input failure description."""
+        return self._error_message
 
     @property
     def last_successful_keypress(self) -> datetime | None:
@@ -90,9 +101,11 @@ class ActivityController(QObject):
             return False
 
         self._consecutive_failures = 0
+        self._error_message = None
         result = self._input_sender()
         self._last_input_result = result
         if not result.success:
+            self._record_failure(result)
             return False
 
         self._record_successful_keypress()
@@ -118,8 +131,19 @@ class ActivityController(QObject):
         self._last_input_result = result
         if result.success:
             self._record_successful_keypress()
+        else:
+            self._record_failure(result)
 
     def _record_successful_keypress(self) -> None:
         """Record and publish a successful local keypress timestamp."""
+        self._consecutive_failures = 0
+        self._error_message = None
         self._last_successful_keypress = datetime.now()
         self.last_successful_keypress_changed.emit(self._last_successful_keypress)
+
+    def _record_failure(self, result: InputResult) -> None:
+        """Record a failed submission and stop after three consecutive failures."""
+        self._consecutive_failures += 1
+        self._error_message = result.error_message or "Input submission failed."
+        if self._consecutive_failures >= 3:
+            self.transition_to(ActivityState.ERROR)

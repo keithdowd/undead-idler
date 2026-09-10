@@ -149,7 +149,7 @@ Completion criteria: the timestamp reflects the last successful complete keypres
 
 ### ACT-006 Implement failure handling
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: ACT-003, ACT-004, WIN-003
 - Increment the consecutive-failure counter after each failed keypress.
 - Reset the counter after any successful keypress.

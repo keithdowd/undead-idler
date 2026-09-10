@@ -125,6 +125,8 @@ def test_failed_initial_keypress_does_not_start_or_record_timestamp():
     assert controller.start() is False
     assert controller.state is ActivityState.STOPPED
     assert controller.last_input_result.error_message == "input blocked"
+    assert controller.consecutive_failures == 1
+    assert controller.error_message == "input blocked"
     assert controller.last_successful_keypress is None
 
 
@@ -192,3 +194,52 @@ def test_successful_timestamp_notification_and_failed_timeout_behavior():
     assert len(timestamps) == 1
     assert timestamps[0] is first_timestamp
     assert controller.last_successful_keypress is first_timestamp
+
+
+def test_three_consecutive_timer_failures_stop_activity_and_expose_error():
+    results = iter([successful_input(), failed_input(), failed_input(), failed_input()])
+    timer = FakeTimer()
+    controller = make_controller(input_sender=lambda: next(results), timer=timer)
+
+    controller.start()
+    timer.timeout.emit()
+    timer.timeout.emit()
+    timer.timeout.emit()
+
+    assert controller.state is ActivityState.ERROR
+    assert timer.isActive() is False
+    assert controller.consecutive_failures == 3
+    assert controller.error_message == "input blocked"
+
+
+def test_successful_keypress_resets_failure_count_and_error_message():
+    results = iter([successful_input(), failed_input(), successful_input()])
+    timer = FakeTimer()
+    controller = make_controller(input_sender=lambda: next(results), timer=timer)
+
+    controller.start()
+    timer.timeout.emit()
+    assert controller.consecutive_failures == 1
+
+    timer.timeout.emit()
+
+    assert controller.state is ActivityState.RUNNING
+    assert controller.consecutive_failures == 0
+    assert controller.error_message is None
+
+
+def test_start_retries_after_automatic_error():
+    results = iter([successful_input(), failed_input(), failed_input(), failed_input(), successful_input()])
+    timer = FakeTimer()
+    controller = make_controller(input_sender=lambda: next(results), timer=timer)
+
+    controller.start()
+    timer.timeout.emit()
+    timer.timeout.emit()
+    timer.timeout.emit()
+    assert controller.state is ActivityState.ERROR
+
+    assert controller.start() is True
+    assert controller.state is ActivityState.RUNNING
+    assert controller.consecutive_failures == 0
+    assert controller.error_message is None
