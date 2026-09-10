@@ -105,7 +105,7 @@ Completion criteria: state transitions are represented independently from the tr
 
 ### ACT-002 Implement runtime interval model
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: UI-002
 - Initialize the interval to 5 minutes on every launch.
 - Accept only whole-minute values from 1 through 10.
