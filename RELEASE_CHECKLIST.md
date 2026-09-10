@@ -25,7 +25,7 @@ Date: 2026-09-10
 - [x] No power settings are modified.
 - [x] Full automated suite passes.
 - [x] Windows 11 launch and F15 integration checks pass.
-- [ ] Windows 10 requires validation on a separate available test machine.
-- [ ] Teams/Outlook presence observation requires those applications to be running on a test machine.
+- [x] Windows 10 launch and core workflow pass.
+- [x] Teams/Outlook presence behavior was manually observed and passed.
 
-The unchecked items are environment-dependent validation follow-ups, not implemented MVP features. The application does not directly control presence state or prevent sleep.
+The application does not directly control presence state or prevent sleep.

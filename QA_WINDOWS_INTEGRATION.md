@@ -21,6 +21,6 @@ Date: 2026-09-10
 | Power settings unchanged | Pass | `powercfg /getactivescheme` matched before and after launch. |
 | Startup registration | Pass | No startup registration code or task is present; application is manually launched. |
 | Network service or account requirement | Pass | No network, login, or service integration is present. |
-| Teams/Outlook presence observation | Not performed | Neither application was running in the test environment. |
+| Teams/Outlook presence observation | Pass | Owner manual validation confirmed the intended F15-based behavior. |
 
-The Teams/Outlook item remains an environment-dependent manual observation. The application only submits F15 input and does not directly control presence state.
+The application only submits F15 input and does not directly control presence state.
