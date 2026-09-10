@@ -76,13 +76,20 @@ Completion criteria: callers can distinguish success from failure and receive a 
 
 ### WIN-004 Manually validate F15 injection
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: WIN-002
 - Run the adapter in a supported Windows desktop session.
 - Confirm F15 key-down and key-up events are submitted.
 - Observe behavior with a test application that can display or record F15 input.
 
 Completion criteria: F15 injection works in the development environment without requiring administrator privileges.
+
+Validation record:
+
+- The adapter returned `success=True` with 2 of 2 events submitted.
+- A temporary Windows F15 hotkey listener received `WM_HOTKEY`.
+- Windows' last-input timestamp changed after the keypress.
+- The successful validation ran with `is_admin=False`.
 
 ## Phase 3: Activity Controller
 
