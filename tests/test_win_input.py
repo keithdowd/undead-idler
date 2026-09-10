@@ -4,6 +4,7 @@ import undead_idler.win_input as win_input
 from undead_idler.win_input import (
     INPUT,
     INPUT_KEYBOARD,
+    InputResult,
     KEYBDINPUT,
     KEYEVENTF_KEYUP,
     VK_F15,
@@ -43,3 +44,30 @@ def test_f15_keypress_rejects_partial_submission(monkeypatch):
     monkeypatch.setattr(win_input, "send_input", lambda events: len(events) - 1)
 
     assert win_input.send_f15_keypress() is False
+
+
+def test_f15_keypress_result_contains_partial_submission_diagnostics(monkeypatch):
+    monkeypatch.setattr(win_input, "send_input", lambda events: len(events) - 1)
+
+    result = win_input.send_f15_keypress_with_result()
+
+    assert isinstance(result, InputResult)
+    assert result.success is False
+    assert result.requested_events == 2
+    assert result.submitted_events == 1
+    assert result.error_message == "SendInput accepted 1 of 2 events."
+
+
+def test_input_result_contains_exception_diagnostics(monkeypatch):
+    monkeypatch.setattr(
+        win_input,
+        "send_input",
+        lambda events: (_ for _ in ()).throw(OSError("input blocked")),
+    )
+
+    result = win_input.send_input_with_result((INPUT(),))
+
+    assert result.success is False
+    assert result.requested_events == 1
+    assert result.submitted_events == 0
+    assert result.error_message == "input blocked"

@@ -66,7 +66,7 @@ Completion criteria: the adapter returns success only when the complete keypress
 
 ### WIN-003 Add input adapter diagnostics
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: WIN-002
 - Capture useful local diagnostic information when `SendInput` fails.
 - Do not send diagnostics over the network.
