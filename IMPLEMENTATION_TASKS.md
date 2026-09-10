@@ -314,7 +314,7 @@ Completion criteria: a single Windows executable launches and operates without a
 
 ### QA-001 Complete automated test suite
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: ACT-002, ACT-003, ACT-005, ACT-006, ACT-007, ACT-008, SET-002, TRAY-004
 - Run unit tests for interval validation, state transitions, timer behavior, failure handling, timestamps, and tooltip formatting.
 - Confirm tests do not require real F15 injection.
