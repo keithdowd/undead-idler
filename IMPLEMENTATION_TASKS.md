@@ -302,7 +302,7 @@ Completion criteria: the folder-based package passes the core end-to-end workflo
 
 ### PKG-003 Produce single executable
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: PKG-002
 - Configure the PyInstaller single-file build.
 - Include the custom icon and required Qt resources.
