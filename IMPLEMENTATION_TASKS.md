@@ -357,7 +357,7 @@ Completion criteria: a user can operate the packaged MVP using the repository do
 
 ### QA-005 Release checklist
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: QA-001, QA-003, QA-004
 - Confirm all PRD acceptance criteria are satisfied.
 - Confirm the executable starts stopped.
