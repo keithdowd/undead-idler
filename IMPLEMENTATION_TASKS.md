@@ -55,7 +55,7 @@ Completion criteria: the adapter module imports on Windows and exposes a typed i
 
 ### WIN-002 Implement complete F15 keypress
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: WIN-001
 - Submit one F15 key-down event.
 - Submit one F15 key-up event.

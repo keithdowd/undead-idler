@@ -91,6 +91,20 @@ def send_input(events: Sequence[INPUT]) -> int:
     )
 
 
+def send_f15_keypress() -> bool:
+    """Submit one complete F15 key-down and key-up sequence."""
+    key_down = INPUT()
+    key_down.type = INPUT_KEYBOARD
+    key_down.ki = KEYBDINPUT(wVk=VK_F15)
+
+    key_up = INPUT()
+    key_up.type = INPUT_KEYBOARD
+    key_up.ki = KEYBDINPUT(wVk=VK_F15, dwFlags=KEYEVENTF_KEYUP)
+
+    events = (key_down, key_up)
+    return send_input(events) == len(events)
+
+
 __all__ = [
     "HARDWAREINPUT",
     "INPUT",
@@ -99,6 +113,6 @@ __all__ = [
     "KEYEVENTF_KEYUP",
     "MOUSEINPUT",
     "VK_F15",
+    "send_f15_keypress",
     "send_input",
 ]
-
