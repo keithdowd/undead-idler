@@ -4,7 +4,7 @@ from undead_idler.activity_controller import (
     ActivityController,
     InvalidActivityTransition,
 )
-from undead_idler.models import ActivityState
+from undead_idler.models import ActivityState, format_timestamp
 from undead_idler.settings_controller import RuntimeSettings
 from undead_idler.win_input import InputResult
 
@@ -116,6 +116,7 @@ def test_start_sends_immediately_and_records_success_timestamp():
     assert controller.state is ActivityState.RUNNING
     assert controller.last_input_result.success is True
     assert controller.last_successful_keypress is not None
+    assert controller.last_successful_keypress_text != "None"
 
 
 def test_failed_initial_keypress_does_not_start_or_record_timestamp():
@@ -166,3 +167,28 @@ def test_stop_deactivates_timer_and_ignores_later_timeout():
 
     assert timer.isActive() is False
     assert calls == [True]
+
+
+def test_successful_timestamp_uses_required_local_display_format():
+    from datetime import datetime
+
+    timestamp = datetime(2026, 9, 9, 14, 32, 0)
+
+    assert format_timestamp(timestamp) == "2026-09-09 14:32:00"
+    assert format_timestamp(None) == "None"
+
+
+def test_successful_timestamp_notification_and_failed_timeout_behavior():
+    results = iter([successful_input(), failed_input()])
+    timer = FakeTimer()
+    controller = make_controller(input_sender=lambda: next(results), timer=timer)
+    timestamps = []
+    controller.last_successful_keypress_changed.connect(timestamps.append)
+
+    controller.start()
+    first_timestamp = controller.last_successful_keypress
+    timer.timeout.emit()
+
+    assert len(timestamps) == 1
+    assert timestamps[0] is first_timestamp
+    assert controller.last_successful_keypress is first_timestamp

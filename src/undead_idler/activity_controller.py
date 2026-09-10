@@ -7,7 +7,7 @@ from datetime import datetime
 
 from PySide6.QtCore import QObject, QTimer, Signal
 
-from .models import ActivityState
+from .models import ActivityState, format_timestamp
 from .settings_controller import RuntimeSettings
 from .win_input import InputResult, send_f15_keypress_with_result
 
@@ -23,6 +23,7 @@ class ActivityController(QObject):
     """Own the activity state and notify observers when it changes."""
 
     state_changed = Signal(object)
+    last_successful_keypress_changed = Signal(object)
 
     _allowed_transitions = {
         ActivityState.STOPPED: {ActivityState.RUNNING},
@@ -62,6 +63,11 @@ class ActivityController(QObject):
         """Return the timestamp of the most recent successful keypress."""
         return self._last_successful_keypress
 
+    @property
+    def last_successful_keypress_text(self) -> str:
+        """Return the last successful keypress in display format."""
+        return format_timestamp(self._last_successful_keypress)
+
     def transition_to(self, state: ActivityState) -> bool:
         """Change state and notify observers; return whether it changed."""
         if state is self._state:
@@ -89,7 +95,7 @@ class ActivityController(QObject):
         if not result.success:
             return False
 
-        self._last_successful_keypress = datetime.now()
+        self._record_successful_keypress()
         changed = self.transition_to(ActivityState.RUNNING)
         self._timer.setInterval(self._settings.interval_minutes * 60 * 1000)
         self._timer.start()
@@ -111,4 +117,9 @@ class ActivityController(QObject):
         result = self._input_sender()
         self._last_input_result = result
         if result.success:
-            self._last_successful_keypress = datetime.now()
+            self._record_successful_keypress()
+
+    def _record_successful_keypress(self) -> None:
+        """Record and publish a successful local keypress timestamp."""
+        self._last_successful_keypress = datetime.now()
+        self.last_successful_keypress_changed.emit(self._last_successful_keypress)

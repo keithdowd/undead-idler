@@ -138,7 +138,7 @@ Completion criteria: a running controller produces one keypress per configured i
 
 ### ACT-005 Implement success timestamp tracking
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: ACT-003, ACT-004
 - Store the last successful keypress timestamp for the current session.
 - Use local system time.
