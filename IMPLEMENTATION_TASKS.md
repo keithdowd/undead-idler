@@ -221,7 +221,7 @@ Completion criteria: valid changes affect the active session and cancel leaves a
 
 ### TRAY-001 Create custom icon assets
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: None
 - Create a custom Undead Idler ICO asset.
 - Include standard Windows application and tray sizes.
