@@ -292,7 +292,7 @@ Completion criteria: a folder-based package is produced and launches on the deve
 
 ### PKG-002 Validate folder-based build
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: PKG-001, TRAY-005
 - Launch the packaged application without Python installed on the test machine if possible.
 - Verify tray creation, menu actions, F15 input, settings, timestamps, and shutdown.
