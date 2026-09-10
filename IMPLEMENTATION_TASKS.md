@@ -95,7 +95,7 @@ Validation record:
 
 ### ACT-001 Define application states
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: UI-002
 - Implement explicit `Stopped`, `Running`, and `Error` states.
 - Define state-change notifications for the tray controller.
