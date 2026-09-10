@@ -28,3 +28,4 @@ htmlcov/
 
 # Release binaries are archived locally and reproducibly built from source
 release/*.exe
+release/*.zip
