@@ -255,7 +255,7 @@ Completion criteria: all required operations are available from the tray and inv
 
 ### TRAY-004 Implement tooltip formatting
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: TRAY-002, ACT-005, ACT-006, SET-003
 - Show current state.
 - Show current interval.

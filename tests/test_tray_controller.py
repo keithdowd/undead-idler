@@ -5,7 +5,11 @@ from PySide6.QtWidgets import QApplication
 
 from undead_idler.activity_controller import ActivityController
 from undead_idler.models import ActivityState
-from undead_idler.tray_controller import TrayIconController, icon_directory
+from undead_idler.tray_controller import (
+    TrayIconController,
+    format_tooltip,
+    icon_directory,
+)
 from undead_idler.win_input import InputResult
 
 
@@ -110,6 +114,50 @@ def test_exit_action_emits_exit_request(qapp):
     tray.exit_action.trigger()
 
     assert requests == [True]
+
+
+def test_tooltip_shows_stopped_state_interval_and_none_timestamp(qapp):
+    controller = make_controller()
+
+    tooltip = format_tooltip(controller)
+
+    assert "State: Stopped" in tooltip
+    assert "Interval: 5 minutes" in tooltip
+    assert "Last successful keypress: None" in tooltip
+    assert "Error:" not in tooltip
+
+
+def test_tooltip_shows_timestamp_after_successful_start(qapp):
+    controller = make_controller()
+    controller.start()
+
+    tooltip = format_tooltip(controller)
+
+    assert "State: Running" in tooltip
+    assert "Last successful keypress: None" not in tooltip
+
+
+def test_tooltip_shows_automatic_stop_message_in_error_state(qapp):
+    controller = make_controller()
+    controller.start()
+    controller._consecutive_failures = 3
+    controller._error_message = "input blocked"
+    controller.transition_to(ActivityState.ERROR)
+
+    tooltip = format_tooltip(controller)
+
+    assert "State: Error" in tooltip
+    assert "Error: Activity stopped after 3 consecutive failures." in tooltip
+    assert "Details: input blocked" in tooltip
+
+
+def test_tray_tooltip_refreshes_when_interval_changes(qapp):
+    controller = make_controller()
+    tray = TrayIconController(controller)
+
+    controller.set_interval(8)
+
+    assert "Interval: 8 minutes" in tray.tray_icon.toolTip()
 
 
 def test_icon_directory_is_not_tied_to_development_machine_path():

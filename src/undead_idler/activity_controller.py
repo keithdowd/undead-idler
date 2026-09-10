@@ -25,6 +25,7 @@ class ActivityController(QObject):
     state_changed = Signal(object)
     last_successful_keypress_changed = Signal(object)
     interval_changed = Signal(int)
+    error_changed = Signal(object)
 
     _allowed_transitions = {
         ActivityState.STOPPED: {ActivityState.RUNNING},
@@ -107,7 +108,9 @@ class ActivityController(QObject):
             return False
 
         self._consecutive_failures = 0
-        self._error_message = None
+        if self._error_message is not None:
+            self._error_message = None
+            self.error_changed.emit(None)
         result = self._input_sender()
         self._last_input_result = result
         if not result.success:
@@ -124,7 +127,9 @@ class ActivityController(QObject):
         """Stop activity and reset transient failure state."""
         self._timer.stop()
         self._consecutive_failures = 0
-        self._error_message = None
+        if self._error_message is not None:
+            self._error_message = None
+            self.error_changed.emit(None)
         return self.transition_to(ActivityState.STOPPED)
 
     def set_interval(self, interval_minutes: int) -> None:
@@ -164,7 +169,9 @@ class ActivityController(QObject):
     def _record_successful_keypress(self) -> None:
         """Record and publish a successful local keypress timestamp."""
         self._consecutive_failures = 0
-        self._error_message = None
+        if self._error_message is not None:
+            self._error_message = None
+            self.error_changed.emit(None)
         self._last_successful_keypress = datetime.now()
         self.last_successful_keypress_changed.emit(self._last_successful_keypress)
 
@@ -172,5 +179,6 @@ class ActivityController(QObject):
         """Record a failed submission and stop after three consecutive failures."""
         self._consecutive_failures += 1
         self._error_message = result.error_message or "Input submission failed."
+        self.error_changed.emit(self._error_message)
         if self._consecutive_failures >= 3:
             self.transition_to(ActivityState.ERROR)

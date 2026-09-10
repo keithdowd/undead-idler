@@ -22,6 +22,24 @@ def icon_directory() -> Path:
     return Path(__file__).resolve().parents[2] / "assets" / "icons"
 
 
+def format_tooltip(activity_controller: ActivityController) -> str:
+    """Format the tray tooltip from the current runtime state."""
+    state = activity_controller.state.value.title()
+    lines = [
+        f"State: {state}",
+        f"Interval: {activity_controller.interval_minutes} minutes",
+        f"Last successful keypress: {activity_controller.last_successful_keypress_text}",
+    ]
+    if (
+        activity_controller.state is ActivityState.ERROR
+        and activity_controller.consecutive_failures >= 3
+    ):
+        lines.append("Error: Activity stopped after 3 consecutive failures.")
+        if activity_controller.error_message:
+            lines.append(f"Details: {activity_controller.error_message}")
+    return "\n".join(lines)
+
+
 class TrayIconController(QObject):
     """Display the activity controller state in the Windows notification area."""
 
@@ -58,6 +76,12 @@ class TrayIconController(QObject):
             for state, filename in self._icon_names.items()
         }
         self.activity_controller.state_changed.connect(self.set_state)
+        self.activity_controller.state_changed.connect(self._refresh_tooltip)
+        self.activity_controller.interval_changed.connect(self._refresh_tooltip)
+        self.activity_controller.last_successful_keypress_changed.connect(
+            self._refresh_tooltip
+        )
+        self.activity_controller.error_changed.connect(self._refresh_tooltip)
         self.start_action.triggered.connect(self.activity_controller.start)
         self.stop_action.triggered.connect(self.activity_controller.stop)
         self.settings_action.triggered.connect(
@@ -77,6 +101,10 @@ class TrayIconController(QObject):
         self.tray_icon.setIcon(self._icons[state])
         self.start_action.setEnabled(state is not ActivityState.RUNNING)
         self.stop_action.setEnabled(state is not ActivityState.STOPPED)
+
+    def _refresh_tooltip(self, *_args) -> None:
+        """Refresh the tray tooltip after a controller value changes."""
+        self.tray_icon.setToolTip(format_tooltip(self.activity_controller))
 
     def icon_path(self, state: ActivityState) -> Path:
         """Return the asset path used for a state."""
