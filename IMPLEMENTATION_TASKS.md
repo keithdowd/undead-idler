@@ -116,7 +116,7 @@ Completion criteria: interval behavior can be tested without starting the Qt tra
 
 ### ACT-003 Implement immediate Start behavior
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: WIN-002, ACT-001, ACT-002
 - Reset the consecutive-failure counter.
 - Submit one F15 keypress immediately.
