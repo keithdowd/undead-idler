@@ -281,7 +281,7 @@ Completion criteria: Exit closes the application without leaving active timers o
 
 ### PKG-001 Configure PyInstaller build
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: UI-003, TRAY-002
 - Add a windowed/no-console PyInstaller configuration.
 - Include Python, PySide6, Qt platform plugins, Python modules, and icon resources.

@@ -13,6 +13,7 @@ env/
 build/
 dist/
 *.spec
+!packaging/*.spec
 *.egg-info/
 
 # IDE and local tooling
