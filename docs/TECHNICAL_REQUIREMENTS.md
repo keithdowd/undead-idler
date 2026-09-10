@@ -2,7 +2,7 @@
 
 ## 1. Purpose
 
-This document translates the requirements in `PRD.md` into an implementation design and ordered build sequence for the Undead Idler MVP.
+This document translates the requirements in `docs/PRD.md` into an implementation design and ordered build sequence for the Undead Idler MVP.
 
 The MVP is a Windows-only Python desktop application with a PySide6 system-tray interface. It directly calls the Windows `SendInput` API through Python `ctypes` to generate periodic F15 keypresses. It does not launch PowerShell or any other worker process.
 

@@ -50,11 +50,11 @@ Use the project metadata and requirements file as the source of truth for the su
 
 ## Implementation Workflow
 
-1. Select the next incomplete task in `IMPLEMENTATION_TASKS.md`.
+1. Select the next incomplete task in `docs/IMPLEMENTATION_TASKS.md`.
 2. Confirm that its listed dependencies are complete.
 3. Implement only the selected task and its required tests or assets.
 4. Run the relevant validation commands.
-5. Mark the task complete in `IMPLEMENTATION_TASKS.md` in the same change.
+5. Mark the task complete in `docs/IMPLEMENTATION_TASKS.md` in the same change.
 6. Create one Git commit for the task.
 
 Each task must have its own commit. Setup, asset, testing, and packaging tasks follow the same rule as coding tasks.

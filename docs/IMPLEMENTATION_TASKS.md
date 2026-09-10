@@ -1,6 +1,6 @@
 # Undead Idler Implementation Tasks
 
-This checklist converts `TECHNICAL_REQUIREMENTS.md` into ordered implementation work. Tasks should be completed in dependency order unless a task is explicitly marked independent.
+This checklist converts `docs/TECHNICAL_REQUIREMENTS.md` into ordered implementation work. Tasks should be completed in dependency order unless a task is explicitly marked independent.
 
 Status values:
 

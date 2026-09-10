@@ -5,7 +5,9 @@ PROJECT_ROOT = Path(__file__).parents[1]
 
 
 def test_release_checklist_and_metadata_exist():
-    checklist = (PROJECT_ROOT / "RELEASE_CHECKLIST.md").read_text(encoding="utf-8")
+    checklist = (PROJECT_ROOT / "docs" / "RELEASE_CHECKLIST.md").read_text(
+        encoding="utf-8"
+    )
     metadata = (PROJECT_ROOT / "release" / "BUILD_METADATA.md").read_text(
         encoding="utf-8"
     )
