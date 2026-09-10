@@ -244,7 +244,7 @@ Completion criteria: the application displays the correct custom icon for each s
 
 ### TRAY-003 Implement tray menu actions
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: TRAY-002, ACT-003, ACT-007, SET-003
 - Add `Start`, `Stop`, `Settings`, and `Exit` actions.
 - Enable and disable actions according to application state.

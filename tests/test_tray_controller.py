@@ -56,6 +56,62 @@ def test_activity_state_changes_update_tray_icon(qapp):
     assert tray.icon_path(controller.state).name == "undead-idler-error.ico"
 
 
+def test_tray_menu_contains_required_actions(qapp):
+    tray = TrayIconController(make_controller())
+
+    assert [action.text() for action in tray.menu.actions() if not action.isSeparator()] == [
+        "Start",
+        "Stop",
+        "Settings",
+        "Exit",
+    ]
+    assert tray.start_action.isEnabled()
+    assert not tray.stop_action.isEnabled()
+    assert tray.settings_action.isEnabled()
+    assert tray.exit_action.isEnabled()
+
+
+def test_start_and_stop_actions_follow_activity_state(qapp):
+    controller = make_controller()
+    tray = TrayIconController(controller)
+
+    tray.start_action.trigger()
+    assert controller.state is ActivityState.RUNNING
+    assert not tray.start_action.isEnabled()
+    assert tray.stop_action.isEnabled()
+
+    tray.stop_action.trigger()
+    assert controller.state is ActivityState.STOPPED
+    assert tray.start_action.isEnabled()
+    assert not tray.stop_action.isEnabled()
+
+
+def test_start_is_idempotent_and_stop_is_safe_when_repeated(qapp):
+    calls = []
+    controller = ActivityController(
+        input_sender=lambda: calls.append(True) or InputResult(True, 2, 2),
+    )
+    tray = TrayIconController(controller)
+
+    tray.start_action.trigger()
+    tray.start_action.trigger()
+    tray.stop_action.trigger()
+    tray.stop_action.trigger()
+
+    assert calls == [True]
+    assert controller.state is ActivityState.STOPPED
+
+
+def test_exit_action_emits_exit_request(qapp):
+    tray = TrayIconController(make_controller())
+    requests = []
+    tray.exit_requested.connect(lambda: requests.append(True))
+
+    tray.exit_action.trigger()
+
+    assert requests == [True]
+
+
 def test_icon_directory_is_not_tied_to_development_machine_path():
     assert isinstance(icon_directory(), Path)
     assert icon_directory().name == "icons"
