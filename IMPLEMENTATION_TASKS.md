@@ -233,7 +233,7 @@ Completion criteria: the icon assets are available in the repository in a format
 
 ### TRAY-002 Implement tray icon controller
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: UI-003, TRAY-001, ACT-001
 - Create the `QSystemTrayIcon`.
 - Load icon resources without absolute development-machine paths.
