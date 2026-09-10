@@ -1,6 +1,6 @@
 """Module entry point for Undead Idler."""
 
-from .app import main
+from undead_idler.app import main
 
 
 if __name__ == "__main__":
