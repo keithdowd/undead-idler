@@ -186,7 +186,7 @@ Completion criteria: interval changes take effect during the current session and
 
 ### SET-001 Build interval settings dialog
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: UI-003, ACT-002
 - Add a whole-number interval input.
 - Display the allowed range of 1 through 10 minutes.
