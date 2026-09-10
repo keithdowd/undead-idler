@@ -39,6 +39,8 @@ class FakeTimer:
         self.timeout = FakeSignal()
         self._interval = 0
         self._active = False
+        self.start_count = 0
+        self.stop_count = 0
 
     def setInterval(self, interval):
         self._interval = interval
@@ -48,9 +50,11 @@ class FakeTimer:
 
     def start(self):
         self._active = True
+        self.start_count += 1
 
     def stop(self):
         self._active = False
+        self.stop_count += 1
 
     def isActive(self):
         return self._active
@@ -276,3 +280,65 @@ def test_shutdown_stops_active_timer_and_is_safe_to_repeat():
 
     assert controller.state is ActivityState.STOPPED
     assert timer.isActive() is False
+
+
+def test_running_interval_change_restarts_timer_without_extra_keypress():
+    calls = []
+    timer = FakeTimer()
+    controller = make_controller(
+        input_sender=lambda: calls.append(True) or successful_input(),
+        timer=timer,
+    )
+
+    controller.start()
+    controller.set_interval(2)
+
+    assert controller.interval_minutes == 2
+    assert timer.interval() == 2 * 60 * 1000
+    assert timer.isActive() is True
+    assert timer.start_count == 2
+    assert timer.stop_count == 1
+    assert calls == [True]
+
+
+def test_stopped_interval_change_applies_on_next_start():
+    timer = FakeTimer()
+    controller = make_controller(timer=timer)
+
+    controller.set_interval(7)
+
+    assert controller.interval_minutes == 7
+    assert timer.isActive() is False
+    assert timer.start_count == 0
+
+    controller.start()
+
+    assert timer.interval() == 7 * 60 * 1000
+    assert timer.isActive() is True
+
+
+def test_invalid_interval_change_preserves_existing_timer_configuration():
+    timer = FakeTimer()
+    controller = make_controller(timer=timer)
+    controller.start()
+    original_interval = timer.interval()
+    original_start_count = timer.start_count
+
+    with pytest.raises(ValueError):
+        controller.set_interval(11)
+
+    assert controller.interval_minutes == 5
+    assert timer.interval() == original_interval
+    assert timer.isActive() is True
+    assert timer.start_count == original_start_count
+
+
+def test_unchanged_running_interval_does_not_restart_timer():
+    timer = FakeTimer()
+    controller = make_controller(timer=timer)
+    controller.start()
+    original_start_count = timer.start_count
+
+    controller.set_interval(5)
+
+    assert timer.start_count == original_start_count

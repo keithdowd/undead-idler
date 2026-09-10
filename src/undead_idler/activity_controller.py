@@ -79,6 +79,11 @@ class ActivityController(QObject):
         """Return the last successful keypress in display format."""
         return format_timestamp(self._last_successful_keypress)
 
+    @property
+    def interval_minutes(self) -> int:
+        """Return the current runtime interval in minutes."""
+        return self._settings.interval_minutes
+
     def transition_to(self, state: ActivityState) -> bool:
         """Change state and notify observers; return whether it changed."""
         if state is self._state:
@@ -120,6 +125,18 @@ class ActivityController(QObject):
         self._consecutive_failures = 0
         self._error_message = None
         return self.transition_to(ActivityState.STOPPED)
+
+    def set_interval(self, interval_minutes: int) -> None:
+        """Validate and apply an interval change for the current session."""
+        previous_interval = self._settings.interval_minutes
+        self._settings.set_interval(interval_minutes)
+        if (
+            self._state is ActivityState.RUNNING
+            and interval_minutes != previous_interval
+        ):
+            self._timer.stop()
+            self._timer.setInterval(interval_minutes * 60 * 1000)
+            self._timer.start()
 
     def shutdown(self) -> None:
         """Stop activity before the owning application exits."""

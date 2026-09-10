@@ -173,7 +173,7 @@ Completion criteria: Stop prevents all future keypresses and leaves the controll
 
 ### ACT-008 Implement runtime interval changes
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: ACT-004, ACT-002
 - Apply a valid saved interval to future timer events.
 - If running, stop and restart the timer.
