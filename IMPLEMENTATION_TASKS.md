@@ -323,7 +323,7 @@ Completion criteria: automated tests pass consistently in the development enviro
 
 ### QA-002 Perform Windows integration testing
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: PKG-002
 - Verify immediate and repeated F15 keypresses.
 - Verify Start, Stop, Settings, and Exit behavior.
