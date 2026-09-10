@@ -7,7 +7,7 @@ from pathlib import Path
 
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtGui import QAction, QIcon
-from PySide6.QtWidgets import QMenu, QSystemTrayIcon
+from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
 from .activity_controller import ActivityController
 from .models import ActivityState
@@ -88,6 +88,8 @@ class TrayIconController(QObject):
             lambda: open_interval_settings(self.activity_controller, self.menu)
         )
         self.exit_action.triggered.connect(self.exit_requested.emit)
+        self.exit_requested.connect(self.shutdown)
+        self._shutdown_complete = False
         self.set_state(ActivityState.STOPPED)
         self.tray_icon.show()
 
@@ -109,3 +111,15 @@ class TrayIconController(QObject):
     def icon_path(self, state: ActivityState) -> Path:
         """Return the asset path used for a state."""
         return icon_directory() / self._icon_names[state]
+
+    def shutdown(self) -> None:
+        """Stop activity, remove the tray icon, and quit the Qt application."""
+        if self._shutdown_complete:
+            return
+        self._shutdown_complete = True
+        self.activity_controller.shutdown()
+        self.tray_icon.setContextMenu(None)
+        self.tray_icon.hide()
+        application = QApplication.instance()
+        if application is not None:
+            application.quit()

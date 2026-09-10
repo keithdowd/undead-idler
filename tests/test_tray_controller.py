@@ -160,6 +160,33 @@ def test_tray_tooltip_refreshes_when_interval_changes(qapp):
     assert "Interval: 8 minutes" in tray.tray_icon.toolTip()
 
 
+def test_shutdown_stops_activity_hides_icon_and_detaches_menu(qapp, monkeypatch):
+    controller = make_controller()
+    tray = TrayIconController(controller)
+    tray.start_action.trigger()
+    quit_calls = []
+    monkeypatch.setattr(qapp, "quit", lambda: quit_calls.append(True))
+
+    tray.shutdown()
+
+    assert controller.state is ActivityState.STOPPED
+    assert not tray.tray_icon.isVisible()
+    assert tray.tray_icon.contextMenu() is None
+    assert quit_calls == [True]
+
+
+def test_shutdown_is_idempotent(qapp, monkeypatch):
+    controller = make_controller()
+    tray = TrayIconController(controller)
+    quit_calls = []
+    monkeypatch.setattr(qapp, "quit", lambda: quit_calls.append(True))
+
+    tray.shutdown()
+    tray.shutdown()
+
+    assert quit_calls == [True]
+
+
 def test_icon_directory_is_not_tied_to_development_machine_path():
     assert isinstance(icon_directory(), Path)
     assert icon_directory().name == "icons"

@@ -268,7 +268,7 @@ Completion criteria: tooltip content matches the technical requirements for stop
 
 ### TRAY-005 Implement clean Exit
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: TRAY-003, ACT-007
 - Stop activity before closing.
 - Remove the tray icon.
