@@ -446,7 +446,7 @@ Implementation record: partial results now enter Error immediately. Odd accepted
 
 ### V020-005 Handle session and power transitions
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: V020-004.
 - Scope: BUG-002; PRD 12.7; technical 12.7.
 - Integrate session/power/shutdown notifications with centralized Stop and resource cleanup.
@@ -454,6 +454,8 @@ Implementation record: partial results now enter Error immediately. Odd accepted
 - Test repeated notifications, Stopped/Running/Error inputs, queued timer races, and bounded shutdown.
 
 Completion criteria: lock/suspend prevents future sequences; resume never auto-starts; shutdown is not vetoed or delayed. Native lifecycle matrix is verified in V020-012.
+
+Implementation record: a Qt native event filter now handles session lock, suspend, query/end-session, and shutdown messages. Relevant events route through Stop, while resume/unlock messages do not restart activity. Native registration and hidden-window resources are cleaned up idempotently during application shutdown. Lifecycle mapping and stop-signal tests pass; packaged Windows 11 lifecycle validation remains in V020-012. Full suite result: 107 passed.
 
 ## Deferred future implementation: Smart Mode
 

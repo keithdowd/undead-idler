@@ -113,6 +113,7 @@ def send_input_with_result(events: Sequence[INPUT]) -> InputResult:
         raise ValueError("at least one input event is required")
 
     try:
+        ctypes.set_last_error(0)
         submitted_events = send_input(events)
     except OSError as error:
         error_code = ctypes.get_last_error() or None

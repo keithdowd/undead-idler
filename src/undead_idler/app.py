@@ -10,6 +10,7 @@ from PySide6.QtWidgets import QApplication
 from .activity_controller import ActivityController
 from .instance_guard import acquire_instance
 from .tray_controller import TrayIconController
+from .windows_lifecycle import WindowsLifecycleMonitor
 
 
 def create_application(argv: Sequence[str] | None = None) -> QApplication:
@@ -35,6 +36,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         application = create_application(argv)
         activity_controller = ActivityController(parent=application)
         TrayIconController(activity_controller, parent=application)
+        lifecycle_monitor = WindowsLifecycleMonitor(application, parent=application)
+        lifecycle_monitor.stop_requested.connect(
+            lambda _reason: activity_controller.stop()
+        )
+        application.aboutToQuit.connect(lifecycle_monitor.close)
         application.aboutToQuit.connect(instance_guard.release)
         return run_application(application)
     finally:
