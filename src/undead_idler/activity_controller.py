@@ -9,7 +9,7 @@ from PySide6.QtCore import QObject, QTimer, Signal
 
 from .models import ActivityState, SimulatedKey, format_timestamp
 from .settings_controller import RuntimeSettings
-from .win_input import InputResult, send_keypress_with_result
+from .win_input import InputResult, cleanup_partial_input, send_keypress_with_result
 
 
 class InvalidActivityTransition(ValueError):
@@ -17,6 +17,7 @@ class InvalidActivityTransition(ValueError):
 
 
 InputSender = Callable[[], InputResult]
+CleanupSender = Callable[[SimulatedKey, int], InputResult]
 
 
 class ActivityController(QObject):
@@ -37,6 +38,7 @@ class ActivityController(QObject):
     def __init__(
         self,
         input_sender: InputSender | None = None,
+        cleanup_sender: CleanupSender = cleanup_partial_input,
         settings: RuntimeSettings | None = None,
         timer: QTimer | None = None,
         parent: QObject | None = None,
@@ -47,6 +49,7 @@ class ActivityController(QObject):
         self._input_sender = input_sender if input_sender is not None else (
             lambda: send_keypress_with_result(self._settings.key)
         )
+        self._cleanup_sender = cleanup_sender
         self._timer = timer if timer is not None else QTimer(self)
         self._timer.timeout.connect(self._on_timer_timeout)
         self._consecutive_failures = 0
@@ -122,6 +125,9 @@ class ActivityController(QObject):
         result = self._input_sender()
         self._last_input_result = result
         if not result.success:
+            if self._is_partial_result(result):
+                self._record_partial_failure(result)
+                return False
             self._record_failure(result)
             if self._state is ActivityState.STOPPED:
                 self.transition_to(ActivityState.ERROR)
@@ -194,6 +200,8 @@ class ActivityController(QObject):
         self._last_input_result = result
         if result.success:
             self._record_successful_keypress()
+        elif self._is_partial_result(result):
+            self._record_partial_failure(result)
         else:
             self._record_failure(result)
 
@@ -213,3 +221,23 @@ class ActivityController(QObject):
         self.error_changed.emit(self._error_message)
         if self._consecutive_failures >= 3:
             self.transition_to(ActivityState.ERROR)
+
+    @staticmethod
+    def _is_partial_result(result: InputResult) -> bool:
+        """Return whether Windows accepted some but not all activity events."""
+        return 0 < result.submitted_events < result.requested_events
+
+    def _record_partial_failure(self, result: InputResult) -> None:
+        """Clean up a partial sequence and enter Error immediately."""
+        cleanup_result = self._cleanup_sender(self.key, result.submitted_events)
+        message = "Input sequence incomplete."
+        if self.key is SimulatedKey.SCROLL_LOCK:
+            message += " Check Scroll Lock state."
+        if result.error_message:
+            message += f" {result.error_message}"
+        if not cleanup_result.success:
+            cleanup_detail = cleanup_result.error_message or "key-release cleanup failed"
+            message += f" Cleanup failed: {cleanup_detail}"
+        self._error_message = message
+        self.error_changed.emit(self._error_message)
+        self.transition_to(ActivityState.ERROR)

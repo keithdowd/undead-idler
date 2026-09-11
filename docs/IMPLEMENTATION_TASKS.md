@@ -433,7 +433,7 @@ Implementation record: RuntimeSettings now holds a session-only F15/Scroll Lock 
 
 ### V020-004 Validate and implement partial-input cleanup
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: V020-003.
 - Scope: BUG-003, FEAT-001; PRD 12.8; technical 12.3; TECH-002.
 - Validate what partial return counts establish and design bounded best-effort release of a potentially held simulated key.
@@ -441,6 +441,8 @@ Implementation record: RuntimeSettings now holds a session-only F15/Scroll Lock 
 - Test every partial count for both keys, cleanup failure, no success timestamp/count reset, and no retry loop. Record controlled native validation limits.
 
 Completion criteria: TECH-002 is resolved in technical requirements; partial submission is distinct from zero-event failure and cannot silently leave activity running.
+
+Implementation record: partial results now enter Error immediately. Odd accepted counts receive one bounded key-up cleanup; even accepted counts receive no speculative event. Scroll Lock failures explain the uncertain toggle state, cleanup failures remain visible, and neither cleanup nor partial submission updates the success timestamp. Focused input/controller tests and the full suite pass (101 tests).
 
 ### V020-005 Handle session and power transitions
 

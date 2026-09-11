@@ -2,7 +2,7 @@ import pytest
 import undead_idler.activity_controller as activity_module
 
 from undead_idler.activity_controller import ActivityController
-from undead_idler.models import ActivityState, format_timestamp
+from undead_idler.models import ActivityState, SimulatedKey, format_timestamp
 from undead_idler.settings_controller import RuntimeSettings
 from undead_idler.win_input import InputResult
 
@@ -243,6 +243,71 @@ def test_three_consecutive_timer_failures_stop_activity_and_expose_error():
     assert timer.isActive() is False
     assert controller.consecutive_failures == 3
     assert controller.error_message == "input blocked"
+
+
+def test_partial_sequence_enters_error_without_counting_as_three_failures():
+    partial = InputResult(
+        success=False,
+        requested_events=4,
+        submitted_events=2,
+        error_message="SendInput accepted 2 of 4 events.",
+    )
+    cleanup_calls = []
+
+    def cleanup(key, submitted_events):
+        cleanup_calls.append((key, submitted_events))
+        return InputResult(True, 0, 0)
+
+    controller = make_controller(
+        input_sender=lambda: partial,
+        timer=FakeTimer(),
+    )
+    controller._cleanup_sender = cleanup
+    controller.set_key(SimulatedKey.SCROLL_LOCK)
+
+    controller.start()
+
+    assert controller.state is ActivityState.ERROR
+    assert controller.consecutive_failures == 0
+    assert cleanup_calls == [(SimulatedKey.SCROLL_LOCK, 2)]
+    assert "Input sequence incomplete. Check Scroll Lock state." in controller.error_message
+
+
+def test_partial_sequence_after_key_down_runs_bounded_cleanup():
+    partial = InputResult(
+        success=False,
+        requested_events=4,
+        submitted_events=1,
+        error_message="SendInput accepted 1 of 4 events.",
+    )
+    cleanup_calls = []
+
+    def cleanup(key, submitted_events):
+        cleanup_calls.append((key, submitted_events))
+        return InputResult(True, 1, 1)
+
+    controller = make_controller(input_sender=lambda: partial)
+    controller._cleanup_sender = cleanup
+    controller.set_key(SimulatedKey.SCROLL_LOCK)
+
+    controller.start()
+
+    assert controller.state is ActivityState.ERROR
+    assert cleanup_calls == [(SimulatedKey.SCROLL_LOCK, 1)]
+    assert "Check Scroll Lock state." in controller.error_message
+
+
+def test_partial_sequence_reports_cleanup_failure():
+    partial = InputResult(False, 2, 1, error_message="partial")
+    controller = make_controller(input_sender=lambda: partial)
+    controller._cleanup_sender = lambda _key, _count: InputResult(
+        False, 1, 0, error_message="cleanup blocked"
+    )
+
+    controller.start()
+
+    assert controller.state is ActivityState.ERROR
+    assert "Cleanup failed: cleanup blocked" in controller.error_message
 
 
 def test_successful_keypress_resets_failure_count_and_error_message():

@@ -1,5 +1,7 @@
 import ctypes
 
+import pytest
+
 import undead_idler.win_input as win_input
 from undead_idler.win_input import (
     INPUT,
@@ -74,6 +76,51 @@ def test_scroll_lock_sequence_submits_two_complete_presses(monkeypatch):
     assert len(submitted) == 4
     assert [event.ki.wVk for event in submitted] == [VK_SCROLL_LOCK] * 4
     assert [event.ki.dwFlags for event in submitted] == [0, KEYEVENTF_KEYUP, 0, KEYEVENTF_KEYUP]
+
+
+@pytest.mark.parametrize("submitted_events", [1, 3])
+def test_partial_scroll_lock_cleanup_releases_only_after_key_down(
+    monkeypatch, submitted_events
+):
+    submitted = []
+
+    def fake_send_input(events):
+        submitted.extend(events)
+        return len(events)
+
+    monkeypatch.setattr(win_input, "send_input", fake_send_input)
+
+    result = win_input.cleanup_partial_input(
+        win_input.SimulatedKey.SCROLL_LOCK, submitted_events
+    )
+
+    assert result.success is True
+    assert len(submitted) == 1
+    assert submitted[0].ki.wVk == VK_SCROLL_LOCK
+    assert submitted[0].ki.dwFlags == KEYEVENTF_KEYUP
+
+
+def test_partial_f15_cleanup_releases_after_key_down(monkeypatch):
+    submitted = []
+    monkeypatch.setattr(win_input, "send_input", lambda events: submitted.extend(events) or len(events))
+
+    result = win_input.cleanup_partial_input(win_input.SimulatedKey.F15, 1)
+
+    assert result.success is True
+    assert len(submitted) == 1
+    assert submitted[0].ki.wVk == VK_F15
+    assert submitted[0].ki.dwFlags == KEYEVENTF_KEYUP
+
+
+def test_partial_scroll_lock_cleanup_does_not_send_speculative_event(monkeypatch):
+    submitted = []
+    monkeypatch.setattr(win_input, "send_input", lambda events: submitted.extend(events) or len(events))
+
+    result = win_input.cleanup_partial_input(win_input.SimulatedKey.SCROLL_LOCK, 2)
+
+    assert result.success is True
+    assert result.requested_events == 0
+    assert submitted == []
 
 
 def test_input_result_contains_exception_diagnostics(monkeypatch):

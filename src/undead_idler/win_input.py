@@ -181,6 +181,26 @@ def build_key_events(key: SimulatedKey) -> tuple[INPUT, ...]:
     raise ValueError("unsupported simulated key")
 
 
+def _build_key_up_event(virtual_key: int) -> INPUT:
+    """Build one key-up event for bounded partial-sequence cleanup."""
+    key_up = INPUT()
+    key_up.type = INPUT_KEYBOARD
+    key_up.ki = KEYBDINPUT(wVk=virtual_key, dwFlags=KEYEVENTF_KEYUP)
+    return key_up
+
+
+def cleanup_partial_input(key: SimulatedKey, submitted_events: int) -> InputResult:
+    """Release a simulated key only when a partial batch ended key-down.
+
+    Even submitted counts end after key-up, so no speculative event is sent.
+    The returned result describes cleanup only; it is never activity success.
+    """
+    if submitted_events <= 0 or submitted_events % 2 == 0:
+        return InputResult(success=True, requested_events=0, submitted_events=0)
+    virtual_key = VK_F15 if key is SimulatedKey.F15 else VK_SCROLL_LOCK
+    return send_input_with_result((_build_key_up_event(virtual_key),))
+
+
 def send_keypress_with_result(key: SimulatedKey) -> InputResult:
     """Submit one complete activity sequence for the selected key."""
     return send_input_with_result(build_key_events(key))
@@ -207,6 +227,7 @@ __all__ = [
     "VK_F15",
     "VK_SCROLL_LOCK",
     "build_key_events",
+    "cleanup_partial_input",
     "send_keypress_with_result",
     "send_f15_keypress",
     "send_f15_keypress_with_result",
