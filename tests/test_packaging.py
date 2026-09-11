@@ -33,6 +33,7 @@ def test_folder_validation_script_checks_runtime_and_icons():
     assert "python313.dll" in script
     assert "undead-idler-running.ico" in script
     assert "Start-Process" in script
+    assert "$process.Refresh()" in script
 
 
 def test_single_file_configuration_is_windowed_and_does_not_collect_folder():

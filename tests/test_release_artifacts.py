@@ -34,3 +34,21 @@ def test_archived_release_binary_matches_metadata_hash():
 
     actual_hash = hashlib.sha256(binary.read_bytes()).hexdigest().upper()
     assert actual_hash == expected_hash
+
+
+def test_020_release_evidence_and_metadata_are_recorded_without_replacing_mvp():
+    release_docs = PROJECT_ROOT / "docs" / "releases" / "0.2.0"
+    checklist = (release_docs / "RELEASE_CHECKLIST.md").read_text(encoding="utf-8")
+    integration = (release_docs / "QA_WINDOWS_INTEGRATION.md").read_text(encoding="utf-8")
+    supported = (release_docs / "QA_SUPPORTED_WINDOWS.md").read_text(encoding="utf-8")
+    metadata = (PROJECT_ROOT / "release" / "BUILD_METADATA-0.2.0.md").read_text(
+        encoding="utf-8"
+    )
+
+    assert "release/UndeadIdler-0.2.0.exe" in checklist
+    assert "110 tests" in checklist
+    assert "F15 native injection | Pass" in integration
+    assert "Scroll Lock native injection | Pass" in integration
+    assert "Windows 10 | Unverified" in supported
+    assert "Release: `0.2.0`" in metadata
+    assert "6D45577B6CFD43AA010B4DD4B109703D5134A74E7208FD47D17B182EDF6F522D" in metadata

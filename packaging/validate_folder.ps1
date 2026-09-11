@@ -28,6 +28,7 @@ try {
     Write-Output "Folder package launched successfully: $executable"
 }
 finally {
+    $process.Refresh()
     if (-not $process.HasExited) {
         Stop-Process -Id $process.Id -Force
     }

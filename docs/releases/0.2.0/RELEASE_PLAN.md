@@ -1,6 +1,6 @@
 # Undead Idler Release Plan
 
-Planning date: 2026-09-11. Target: **0.2.0**. Status: scope approved; development and release verification not started. No release date is assigned.
+Planning date: 2026-09-11. Target: **0.2.0**. Status: implementation complete; release verification is in progress. No release date is assigned.
 
 ## Document ownership
 
@@ -65,6 +65,7 @@ These are wording/technical validation items; they do not undo approved user-vis
 - Updated README describes implemented behavior and limitations accurately.
 - During verification, create RELEASE_CHECKLIST.md, QA_WINDOWS_INTEGRATION.md, and QA_SUPPORTED_WINDOWS.md under docs/releases/0.2.0/. Record actual results and artifact hashes/build versions; do not prefill passes.
 - Archive the tested 0.2.0 artifact and matching build metadata without overwriting 0.1.0 evidence. Release date/publication follows readiness, not this planning edit.
+- Current gate: interactive visual checks of Settings, About, and the tooltip remain outstanding; do not merge to `main` or sign off distribution until those checks are recorded.
 
 ## Future backlog — not scheduled
 
