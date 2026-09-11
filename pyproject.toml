@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "undead-idler"
-version = "0.1.0"
+dynamic = ["version"]
 description = "A local Windows tray utility for periodic F15 keyboard input."
 requires-python = ">=3.11"
 dependencies = [
@@ -16,6 +16,9 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.dynamic]
+version = {attr = "undead_idler.__version__"}
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

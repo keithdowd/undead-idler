@@ -10,6 +10,7 @@ from PySide6.QtGui import QAction, QIcon
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
 from .activity_controller import ActivityController
+from .about_dialog import AboutDialog
 from .models import ActivityState
 from .settings_dialog import open_interval_settings
 
@@ -71,11 +72,14 @@ class TrayIconController(QObject):
         self.start_action = QAction("Start", self.menu)
         self.stop_action = QAction("Stop", self.menu)
         self.settings_action = QAction("Settings", self.menu)
+        self.about_action = QAction("About", self.menu)
         self.exit_action = QAction("Exit", self.menu)
         self.menu.addAction(self.start_action)
         self.menu.addAction(self.stop_action)
         self.menu.addSeparator()
         self.menu.addAction(self.settings_action)
+        self.menu.addSeparator()
+        self.menu.addAction(self.about_action)
         self.menu.addSeparator()
         self.menu.addAction(self.exit_action)
         self.tray_icon.setContextMenu(self.menu)
@@ -96,9 +100,11 @@ class TrayIconController(QObject):
         self.settings_action.triggered.connect(
             lambda: open_interval_settings(self.activity_controller, self.menu)
         )
+        self.about_action.triggered.connect(self.show_about)
         self.exit_action.triggered.connect(self.exit_requested.emit)
         self.exit_requested.connect(self.shutdown)
         self._shutdown_complete = False
+        self._about_dialog: AboutDialog | None = None
         self.set_state(ActivityState.STOPPED)
         self.tray_icon.show()
 
@@ -120,6 +126,14 @@ class TrayIconController(QObject):
     def icon_path(self, state: ActivityState) -> Path:
         """Return the asset path used for a state."""
         return icon_directory() / self._icon_names[state]
+
+    def show_about(self) -> None:
+        """Show the reusable About dialog without changing activity."""
+        if self._about_dialog is None:
+            self._about_dialog = AboutDialog(self.menu)
+        self._about_dialog.show()
+        self._about_dialog.raise_()
+        self._about_dialog.activateWindow()
 
     def shutdown(self) -> None:
         """Stop activity, remove the tray icon, and quit the Qt application."""

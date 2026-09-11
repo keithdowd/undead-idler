@@ -512,14 +512,16 @@ Implementation record: the tray now labels the field Status and shows Status, In
 
 ### V020-010 Add About and shared version metadata
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: None (MVP baseline); resolve DOC-001 before completion. Independent UI task.
 - Scope: CHG-002; PRD 12.4; technical 12.8.
 - Resolve About description wording, add the action immediately above Exit, and implement a reusable dialog with OK.
 - Use one application version source shared with packaging; do not hardcode a separate dialog version.
 - Test repeated opening, all statuses, no activity interruption, and version consistency; verify bundled display in V020-012.
 
-Completion criteria: approved copy and actual version appear in one dialog; behavior/settings remain unchanged except normal Smart activity detection of user interaction.
+Completion criteria: approved copy and actual version appear in one dialog; activity, status, and settings remain unchanged when About is opened or closed.
+
+Implementation record: About is immediately above Exit, available in every status, reusable, and non-modal to activity. The dialog uses the approved F15/Scroll Lock description and shared package version `0.2.0`; pyproject metadata reads the same package version. Tray/About/version tests and the full suite pass (109 tests).
 
 ### V020-011 Complete regression checks and user documentation
 

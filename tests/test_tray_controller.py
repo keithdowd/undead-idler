@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 from PySide6.QtWidgets import QApplication
+from PySide6.QtWidgets import QDialog, QLabel
 
 from undead_idler.activity_controller import ActivityController
 from undead_idler.models import ActivityState
@@ -68,11 +69,13 @@ def test_tray_menu_contains_required_actions(qapp):
         "Start",
         "Stop",
         "Settings",
+        "About",
         "Exit",
     ]
     assert tray.start_action.isEnabled()
     assert not tray.stop_action.isEnabled()
     assert tray.settings_action.isEnabled()
+    assert tray.about_action.isEnabled()
     assert tray.exit_action.isEnabled()
 
 
@@ -203,6 +206,26 @@ def test_tray_tooltip_refreshes_when_key_changes(qapp):
     controller.set_key(SimulatedKey.SCROLL_LOCK)
 
     assert "Key: Scroll Lock" in tray.tray_icon.toolTip()
+
+
+def test_about_action_shows_version_and_description_without_changing_activity(qapp):
+    controller = make_controller()
+    tray = TrayIconController(controller)
+    tray.about_action.trigger()
+
+    dialog = tray._about_dialog
+    assert dialog is not None
+    assert dialog.isVisible()
+    assert dialog.findChild(QLabel, "about_version").text() == "Version 0.2.0"
+    assert "F15 or paired Scroll Lock" in dialog.findChild(
+        QLabel, "about_description"
+    ).text()
+    assert controller.state is ActivityState.STOPPED
+
+    tray.about_action.trigger()
+    assert tray._about_dialog is dialog
+    dialog.accept()
+    assert dialog.result() == QDialog.DialogCode.Accepted
 
 
 def test_shutdown_stops_activity_hides_icon_and_detaches_menu(qapp, monkeypatch):
