@@ -30,7 +30,7 @@ Date: 2026-09-11
 | About/version | Pass (automated) | Tray/About tests cover approved copy, reusable dialog, and shared version `0.2.0`. |
 | Native interactive UI review | Not run | Requires an interactive desktop session outside this restricted shell. |
 | Initial launch tooltip | Pass | V020-013 initializes the complete stopped tooltip before showing the tray icon. |
-| Interval helper-text placement | Fail | Manual review found the range text below Key; tracked as CHG-004. |
+| Interval helper-text placement | Pass (source) | V020-014 places the range text directly below Interval; rebuilt-package visual confirmation remains part of final sign-off. |
 
 Native input passed in the available medium-integrity standard-user token. Interactive visual checks still require a desktop review before distribution sign-off.
 

@@ -565,7 +565,7 @@ Implementation record: tray initialization now formats and assigns the complete 
 
 ### V020-014 Reposition interval helper text
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: V020-012 manual review finding.
 - Scope: CHG-004; PRD 12.5; technical 5.2/12.8.
 - Place the whole-number range helper text directly below the interval input and before the key selector.
@@ -573,3 +573,5 @@ Implementation record: tray initialization now formats and assigns the complete 
 - Test the dialog layout relationship and retain the existing validation coverage.
 
 Completion criteria: the Settings dialog visually associates the range guidance with the interval field without changing runtime behavior.
+
+Implementation record: the interval range helper label now appears immediately below the interval input and before the key selector. A Settings-dialog regression test verifies the form-row order while existing validation and Save/Cancel tests remain unchanged. Focused Settings tests and the full suite pass (113 tests).

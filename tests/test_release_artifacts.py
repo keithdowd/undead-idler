@@ -51,4 +51,4 @@ def test_020_release_evidence_and_metadata_are_recorded_without_replacing_mvp():
     assert "Scroll Lock native injection | Pass" in integration
     assert "Windows 10 | Unverified" in supported
     assert "Release: `0.2.0`" in metadata
-    assert "6D45577B6CFD43AA010B4DD4B109703D5134A74E7208FD47D17B182EDF6F522D" in metadata
+    assert "3489EF9CA1B940DDB0F67BFBAB7C082B094F70F688538CCD3BE1D3E46524AA21" in metadata

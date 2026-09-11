@@ -71,8 +71,8 @@ class IntervalSettingsDialog(QDialog):
 
         layout = QFormLayout(self)
         layout.addRow("Interval (minutes):", self.interval_input)
-        layout.addRow("Key:", self.key_input)
         layout.addRow(range_label)
+        layout.addRow("Key:", self.key_input)
         layout.addRow(self.validation_message)
         layout.addRow(buttons)
 

@@ -28,6 +28,17 @@ def test_settings_dialog_initializes_current_interval(qapp):
     assert dialog.findChild(QLabel, "interval_range_label") is not None
 
 
+def test_interval_range_guidance_is_below_interval_before_key(qapp):
+    dialog = IntervalSettingsDialog(5)
+    range_label = dialog.findChild(QLabel, "interval_range_label")
+
+    assert range_label is not None
+    interval_row, _ = dialog.layout().getWidgetPosition(dialog.interval_input)
+    range_row, _ = dialog.layout().getWidgetPosition(range_label)
+    key_row, _ = dialog.layout().getWidgetPosition(dialog.key_input)
+    assert interval_row < range_row < key_row
+
+
 def test_settings_dialog_initializes_and_saves_selected_key(qapp):
     dialog = IntervalSettingsDialog(5, current_key=SimulatedKey.SCROLL_LOCK)
 
