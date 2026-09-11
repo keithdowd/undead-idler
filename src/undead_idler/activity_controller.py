@@ -7,9 +7,9 @@ from datetime import datetime
 
 from PySide6.QtCore import QObject, QTimer, Signal
 
-from .models import ActivityState, format_timestamp
+from .models import ActivityState, SimulatedKey, format_timestamp
 from .settings_controller import RuntimeSettings
-from .win_input import InputResult, send_f15_keypress_with_result
+from .win_input import InputResult, send_keypress_with_result
 
 
 class InvalidActivityTransition(ValueError):
@@ -25,6 +25,7 @@ class ActivityController(QObject):
     state_changed = Signal(object)
     last_successful_keypress_changed = Signal(object)
     interval_changed = Signal(int)
+    key_changed = Signal(object)
     error_changed = Signal(object)
 
     _allowed_transitions = {
@@ -35,15 +36,17 @@ class ActivityController(QObject):
 
     def __init__(
         self,
-        input_sender: InputSender = send_f15_keypress_with_result,
+        input_sender: InputSender | None = None,
         settings: RuntimeSettings | None = None,
         timer: QTimer | None = None,
         parent: QObject | None = None,
     ) -> None:
         super().__init__(parent)
         self._state = ActivityState.STOPPED
-        self._input_sender = input_sender
         self._settings = settings or RuntimeSettings()
+        self._input_sender = input_sender if input_sender is not None else (
+            lambda: send_keypress_with_result(self._settings.key)
+        )
         self._timer = timer if timer is not None else QTimer(self)
         self._timer.timeout.connect(self._on_timer_timeout)
         self._consecutive_failures = 0
@@ -85,6 +88,11 @@ class ActivityController(QObject):
     def interval_minutes(self) -> int:
         """Return the current runtime interval in minutes."""
         return self._settings.interval_minutes
+
+    @property
+    def key(self) -> SimulatedKey:
+        """Return the selected simulated key."""
+        return self._settings.key
 
     def transition_to(self, state: ActivityState) -> bool:
         """Change state and notify observers; return whether it changed."""
@@ -147,6 +155,27 @@ class ActivityController(QObject):
             self._timer.start()
         if interval_minutes != previous_interval:
             self.interval_changed.emit(interval_minutes)
+
+    def set_key(self, key: SimulatedKey) -> None:
+        """Apply a key change without resetting the current timer."""
+        previous_key = self._settings.key
+        self._settings.set_key(key)
+        if key != previous_key:
+            self.key_changed.emit(key)
+
+    def apply_settings(self, interval_minutes: int, key: SimulatedKey) -> None:
+        """Apply validated interval and key settings as one operation."""
+        previous_interval = self._settings.interval_minutes
+        previous_key = self._settings.key
+        self._settings.set_settings(interval_minutes, key)
+        if self._state is ActivityState.RUNNING and interval_minutes != previous_interval:
+            self._timer.stop()
+            self._timer.setInterval(interval_minutes * 60 * 1000)
+            self._timer.start()
+        if interval_minutes != previous_interval:
+            self.interval_changed.emit(interval_minutes)
+        if key != previous_key:
+            self.key_changed.emit(key)
 
     def shutdown(self) -> None:
         """Stop activity before the owning application exits."""

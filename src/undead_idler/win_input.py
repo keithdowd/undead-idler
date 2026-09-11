@@ -7,6 +7,8 @@ from collections.abc import Sequence
 from ctypes import wintypes
 from dataclasses import dataclass
 
+from .models import SimulatedKey
+
 if ctypes.sizeof(ctypes.c_void_p) == 8:
     ULONG_PTR = ctypes.c_uint64
 else:
@@ -19,6 +21,7 @@ INPUT_HARDWARE = 2
 
 KEYEVENTF_KEYUP = 0x0002
 VK_F15 = 0x7E
+VK_SCROLL_LOCK = 0x91
 
 
 class MOUSEINPUT(ctypes.Structure):
@@ -145,22 +148,47 @@ def send_input_with_result(events: Sequence[INPUT]) -> InputResult:
     )
 
 
+def _build_key_events(virtual_key: int, presses: int = 1) -> tuple[INPUT, ...]:
+    """Build complete down/up events for one or more consecutive presses."""
+    events = []
+    for _ in range(presses):
+        key_down = INPUT()
+        key_down.type = INPUT_KEYBOARD
+        key_down.ki = KEYBDINPUT(wVk=virtual_key)
+        key_up = INPUT()
+        key_up.type = INPUT_KEYBOARD
+        key_up.ki = KEYBDINPUT(wVk=virtual_key, dwFlags=KEYEVENTF_KEYUP)
+        events.extend((key_down, key_up))
+    return tuple(events)
+
+
 def _build_f15_events() -> tuple[INPUT, INPUT]:
     """Build one F15 key-down and key-up sequence."""
-    key_down = INPUT()
-    key_down.type = INPUT_KEYBOARD
-    key_down.ki = KEYBDINPUT(wVk=VK_F15)
+    return _build_key_events(VK_F15)
 
-    key_up = INPUT()
-    key_up.type = INPUT_KEYBOARD
-    key_up.ki = KEYBDINPUT(wVk=VK_F15, dwFlags=KEYEVENTF_KEYUP)
 
-    return key_down, key_up
+def _build_scroll_lock_events() -> tuple[INPUT, ...]:
+    """Build two complete Scroll Lock presses."""
+    return _build_key_events(VK_SCROLL_LOCK, presses=2)
+
+
+def build_key_events(key: SimulatedKey) -> tuple[INPUT, ...]:
+    """Build the complete event batch for a selected simulated key."""
+    if key is SimulatedKey.F15:
+        return _build_f15_events()
+    if key is SimulatedKey.SCROLL_LOCK:
+        return _build_scroll_lock_events()
+    raise ValueError("unsupported simulated key")
+
+
+def send_keypress_with_result(key: SimulatedKey) -> InputResult:
+    """Submit one complete activity sequence for the selected key."""
+    return send_input_with_result(build_key_events(key))
 
 
 def send_f15_keypress_with_result() -> InputResult:
     """Submit F15 and return success plus local failure diagnostics."""
-    return send_input_with_result(_build_f15_events())
+    return send_keypress_with_result(SimulatedKey.F15)
 
 
 def send_f15_keypress() -> bool:
@@ -177,6 +205,9 @@ __all__ = [
     "KEYEVENTF_KEYUP",
     "MOUSEINPUT",
     "VK_F15",
+    "VK_SCROLL_LOCK",
+    "build_key_events",
+    "send_keypress_with_result",
     "send_f15_keypress",
     "send_f15_keypress_with_result",
     "send_input",

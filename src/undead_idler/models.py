@@ -15,6 +15,13 @@ class ActivityState(Enum):
     ERROR = "error"
 
 
+class SimulatedKey(Enum):
+    """Keys supported by the runtime input setting."""
+
+    F15 = "F15"
+    SCROLL_LOCK = "Scroll Lock"
+
+
 def format_timestamp(timestamp: datetime | None) -> str:
     """Format a local activity timestamp for user-facing display."""
     if timestamp is None:

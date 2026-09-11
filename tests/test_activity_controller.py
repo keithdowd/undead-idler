@@ -1,4 +1,5 @@
 import pytest
+import undead_idler.activity_controller as activity_module
 
 from undead_idler.activity_controller import ActivityController
 from undead_idler.models import ActivityState, format_timestamp
@@ -118,6 +119,21 @@ def test_start_sends_immediately_and_records_success_timestamp():
     assert controller.last_input_result.success is True
     assert controller.last_successful_keypress is not None
     assert controller.last_successful_keypress_text != "None"
+
+
+def test_default_sender_uses_selected_key(monkeypatch):
+    calls = []
+
+    monkeypatch.setattr(
+        activity_module,
+        "send_keypress_with_result",
+        lambda key: calls.append(key) or successful_input(),
+    )
+    controller = ActivityController()
+    controller.set_key(activity_module.SimulatedKey.SCROLL_LOCK)
+
+    assert controller.start() is True
+    assert calls == [activity_module.SimulatedKey.SCROLL_LOCK]
 
 
 def test_failed_initial_keypress_does_not_start_or_record_timestamp():

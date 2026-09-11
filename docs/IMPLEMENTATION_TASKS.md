@@ -419,7 +419,7 @@ Implementation record: failed Start transitions from Stopped to Error with the t
 
 ### V020-003 Add key selection and complete sequences
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: V020-002.
 - Scope: FEAT-001; PRD 12.5; technical 12.3/12.6.
 - Add a session-only F15/Scroll Lock enum with F15 launch default; extend Settings without adding Smart Mode.
@@ -428,6 +428,8 @@ Implementation record: failed Start transitions from Stopped to Error with the t
 - Test event order/count/marker, defaults, invalid selections, settings transactions, and normal-mode scheduling.
 
 Completion criteria: both keys are selectable and full success requires the complete batch; no persistence or extra keypress results from saving settings.
+
+Implementation record: RuntimeSettings now holds a session-only F15/Scroll Lock selection with F15 as the launch default. Settings saves interval and key atomically; key-only changes preserve timer scheduling and interval changes restart it. F15 submits down/up and Scroll Lock submits down/up/down/up. Focused settings/input tests and the full suite pass (96 tests). Partial-submission cleanup remains assigned to V020-004.
 
 ### V020-004 Validate and implement partial-input cleanup
 

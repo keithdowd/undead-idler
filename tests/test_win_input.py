@@ -8,6 +8,7 @@ from undead_idler.win_input import (
     KEYBDINPUT,
     KEYEVENTF_KEYUP,
     VK_F15,
+    VK_SCROLL_LOCK,
     _SendInput,
 )
 
@@ -56,6 +57,23 @@ def test_f15_keypress_result_contains_partial_submission_diagnostics(monkeypatch
     assert result.requested_events == 2
     assert result.submitted_events == 1
     assert result.error_message == "SendInput accepted 1 of 2 events."
+
+
+def test_scroll_lock_sequence_submits_two_complete_presses(monkeypatch):
+    submitted = []
+
+    def fake_send_input(events):
+        submitted.extend(events)
+        return len(events)
+
+    monkeypatch.setattr(win_input, "send_input", fake_send_input)
+
+    result = win_input.send_keypress_with_result(win_input.SimulatedKey.SCROLL_LOCK)
+
+    assert result.success is True
+    assert len(submitted) == 4
+    assert [event.ki.wVk for event in submitted] == [VK_SCROLL_LOCK] * 4
+    assert [event.ki.dwFlags for event in submitted] == [0, KEYEVENTF_KEYUP, 0, KEYEVENTF_KEYUP]
 
 
 def test_input_result_contains_exception_diagnostics(monkeypatch):

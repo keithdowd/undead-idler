@@ -1,4 +1,4 @@
-"""Interval settings dialog."""
+"""Runtime interval and simulated-key settings dialog."""
 
 from __future__ import annotations
 
@@ -9,19 +9,27 @@ from PySide6.QtWidgets import (
     QFormLayout,
     QLabel,
     QLineEdit,
+    QComboBox,
     QWidget,
 )
 
+from .models import SimulatedKey
 from .settings_controller import InvalidInterval, RuntimeSettings
 
 
 class IntervalSettingsDialog(QDialog):
-    """Present the session interval setting and Save/Cancel actions."""
+    """Present session interval/key settings and Save/Cancel actions."""
 
-    def __init__(self, current_interval: int, parent: QDialog | None = None) -> None:
+    def __init__(
+        self,
+        current_interval: int,
+        parent: QDialog | None = None,
+        current_key: SimulatedKey = SimulatedKey.F15,
+    ) -> None:
         super().__init__(parent)
         self.setWindowTitle("Undead Idler Settings")
         self._saved_interval = current_interval
+        self._saved_key = current_key
 
         self.interval_input = QLineEdit(str(current_interval), self)
         self.interval_input.setObjectName("interval_input")
@@ -33,6 +41,12 @@ class IntervalSettingsDialog(QDialog):
                 self.interval_input,
             )
         )
+
+        self.key_input = QComboBox(self)
+        self.key_input.setObjectName("key_input")
+        for key in SimulatedKey:
+            self.key_input.addItem(key.value, key)
+        self.key_input.setCurrentIndex(self.key_input.findData(current_key))
 
         range_label = QLabel(
             f"Enter a whole number from {RuntimeSettings.MIN_INTERVAL_MINUTES} "
@@ -57,6 +71,7 @@ class IntervalSettingsDialog(QDialog):
 
         layout = QFormLayout(self)
         layout.addRow("Interval (minutes):", self.interval_input)
+        layout.addRow("Key:", self.key_input)
         layout.addRow(range_label)
         layout.addRow(self.validation_message)
         layout.addRow(buttons)
@@ -65,6 +80,11 @@ class IntervalSettingsDialog(QDialog):
     def interval_minutes(self) -> int:
         """Return the interval most recently accepted by the dialog."""
         return self._saved_interval
+
+    @property
+    def selected_key(self) -> SimulatedKey:
+        """Return the key most recently accepted by the dialog."""
+        return self._saved_key
 
     def _handle_save(self) -> None:
         """Validate the input before accepting the dialog."""
@@ -80,6 +100,7 @@ class IntervalSettingsDialog(QDialog):
             return
 
         self._saved_interval = interval
+        self._saved_key = self.key_input.currentData()
         self.accept()
 
 
@@ -91,11 +112,15 @@ def apply_interval_dialog(activity_controller, dialog: IntervalSettingsDialog) -
     if result != QDialog.DialogCode.Accepted:
         return False
 
-    activity_controller.set_interval(dialog.interval_minutes)
+    activity_controller.apply_settings(dialog.interval_minutes, dialog.selected_key)
     return True
 
 
 def open_interval_settings(activity_controller, parent: QWidget | None = None) -> bool:
     """Open interval settings and apply the value when the user saves it."""
-    dialog = IntervalSettingsDialog(activity_controller.interval_minutes, parent)
+    dialog = IntervalSettingsDialog(
+        activity_controller.interval_minutes,
+        parent,
+        activity_controller.key,
+    )
     return apply_interval_dialog(activity_controller, dialog)
