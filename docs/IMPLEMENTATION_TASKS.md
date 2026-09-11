@@ -549,3 +549,25 @@ Implementation record: README now documents the 0.2.0 tray operations, F15 and p
 Completion criteria: release readiness in [RELEASE_PLAN.md](releases/0.2.0/RELEASE_PLAN.md) is demonstrated, all required cases are resolved, and TECH-003 is closed. Packaging/verification does not itself publish a release.
 
 Implementation record: folder and single-file packages were rebuilt with Python 3.13.6, PySide6 6.11.0, and PyInstaller 6.21.0 on Windows 11 build 26200. Both forms launch, the folder validator checks runtime/icon resources, duplicate launch prevention passes, and native F15/Scroll Lock input passes in a medium-integrity standard-user token. The archived single-file artifact and matching metadata are recorded in `release/BUILD_METADATA-0.2.0.md`; release QA records are in `docs/releases/0.2.0/`. The existing folder validator was fixed to refresh its process before cleanup. Interactive visual checks of Settings, About, and the tooltip remain outstanding, so release readiness is not yet signed off.
+
+### V020-013 Initialize tooltip on tray creation
+
+- Status: `[ ]`
+- Dependencies: V020-012 manual review finding.
+- Scope: BUG-004; PRD 12.3; technical 12.8.
+- Populate the complete Status, Interval, Key, and Last keypress tooltip before the first Start action.
+- Preserve existing refresh behavior for state, settings, success, warnings, and errors.
+- Test the initial stopped tooltip and confirm no activity is triggered by initialization.
+
+Completion criteria: hovering the tray icon immediately after launch shows the complete stopped tooltip with the default values.
+
+### V020-014 Reposition interval helper text
+
+- Status: `[ ]`
+- Dependencies: V020-012 manual review finding.
+- Scope: CHG-004; PRD 12.5; technical 5.2/12.8.
+- Place the whole-number range helper text directly below the interval input and before the key selector.
+- Preserve existing validation, sizing, and Save/Cancel behavior.
+- Test the dialog layout relationship and retain the existing validation coverage.
+
+Completion criteria: the Settings dialog visually associates the range guidance with the interval field without changing runtime behavior.

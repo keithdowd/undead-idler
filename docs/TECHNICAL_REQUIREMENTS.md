@@ -207,7 +207,8 @@ The menu should visually distinguish the active state through action availabilit
 The settings dialog must contain:
 
 - A whole-number interval input.
-- The allowed range, 1 through 10 minutes.
+- The allowed range, 1 through 10 minutes, displayed directly below the interval input.
+- The key selector below the interval helper text.
 - `Save` and `Cancel` actions.
 
 The dialog must reject fractional, empty, non-numeric, below-minimum, and above-maximum values.
@@ -508,7 +509,7 @@ Native event ordering can race with queued timer callbacks: invalidate work befo
 
 Menu: Start, Stop, Settings, About, Exit, with separators as useful. About is immediately above Exit. Smart Mode is deferred from 0.2.0. Settings exposes only interval and key selection. Keep distinct Running/Stopped/Error icons; no Activity field.
 
-Use the four 0.2.0 tooltip fields in PRD 12.3 (Status, Interval, Key, and Last keypress), with concise appended warning/error reason. Refresh on status, interval, key, success, and warning changes. Validate native tooltip length/rendering; do not let a long diagnostic hide essential status/error information. A startup failure or partial submission must not display a misleading three-failure message.
+Use the four 0.2.0 tooltip fields in PRD 12.3 (Status, Interval, Key, and Last keypress), with concise appended warning/error reason. Populate the tooltip during tray initialization before the first user action. Refresh on status, interval, key, success, and warning changes. Validate native tooltip length/rendering; do not let a long diagnostic hide essential status/error information. A startup failure or partial submission must not display a misleading three-failure message.
 
 About uses a single reusable dialog, OK, the approved description (subject to DOC-001), and a shared application version source that also drives packaging metadata. Verify the bundled version without assuming installed package metadata exists. Opening dialogs must not block activity scheduling or change status.
 

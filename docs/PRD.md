@@ -194,7 +194,7 @@ Only one instance may run per Windows user session. A duplicate launch must exit
 
 Replace the user-facing label `State` with `Status`. Values remain `Running`, `Stopped`, and `Error`. No Smart Mode or Activity line is included in the 0.2.0 tooltip.
 
-The tooltip must show these fields in every status, refreshing when values change:
+The tooltip must be populated when the tray icon first appears and show these fields in every status, refreshing when values change:
 
 ```text
 Status: Running
@@ -220,6 +220,8 @@ Show `Undead Idler` and the actual application release version from shared versi
 ### 12.5 FEAT-001: Key selection
 
 Settings offers F15 or Scroll Lock alongside the existing whole-minute interval (1-10, default 5). F15 is the launch default; key selection is session-only. Each activity event sends one complete F15 press or two consecutive complete Scroll Lock presses. This applies to immediate Start and subsequent events. A successful Scroll Lock pair normally restores the original toggle state; failure handling must not promise restoration after partial submission.
+
+The Settings interval range helper text appears directly below the interval input and before the key selector.
 
 Save validates all fields before applying either. Cancel or invalid input keeps prior settings. Key-only changes affect the next sequence without resetting its schedule. Interval changes restart timing with the new interval; combined changes use the new key and interval. Save without changes has no timing side effect. Settings never contains Smart Mode.
 

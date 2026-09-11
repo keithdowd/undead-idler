@@ -40,7 +40,7 @@ Settings offers two simulated-key choices:
 - `F15` submits one key-down and one key-up event.
 - `Scroll Lock` submits a paired sequence of key-down, key-up, key-down, and key-up events so the key ends in its original toggle state after a complete sequence.
 
-The tray tooltip shows the current `Status`, `Interval`, selected `Key`, and the date/time of the last successful keypress. It shows `None` before a successful keypress has occurred. A failed initial keypress enters the error state immediately. During a running session, the first two consecutive failures remain visible as warnings and the third stops activity and enters the error state. A partial input sequence enters the error state immediately; for Scroll Lock, the tooltip also reports that the toggle state may be uncertain.
+The tray tooltip is available as soon as the tray icon appears and shows the current `Status`, `Interval`, selected `Key`, and the date/time of the last successful keypress. It shows `None` before a successful keypress has occurred. A failed initial keypress enters the error state immediately. During a running session, the first two consecutive failures remain visible as warnings and the third stops activity and enters the error state. A partial input sequence enters the error state immediately; for Scroll Lock, the tooltip also reports that the toggle state may be uncertain.
 
 ## Windows Session and Power Events
 

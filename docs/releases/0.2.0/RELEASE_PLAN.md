@@ -13,7 +13,7 @@ The original MVP sections remain explicitly historical; the 0.2.0 sections overr
 
 ## Approved 0.2.0 scope
 
-All entries are planned, not implemented. Planning IDs identify scope; task IDs identify implementation work.
+Planning IDs identify scope; task IDs identify implementation work and current status.
 
 | ID | Type | Outcome | PRD section | Technical section | Tasks |
 | --- | --- | --- | --- | --- | --- |
@@ -23,9 +23,11 @@ All entries are planned, not implemented. Planning IDs identify scope; task IDs 
 | CHG-001 | Change | Rename State to Status; retain Running/Stopped/Error. | 12.3 | 12.8 | V020-009 |
 | CHG-002 | Change | About menu/dialog with description and actual release version. | 12.4 | 12.8 | V020-010 |
 | CHG-003 | Change | Show selected key in tooltip. | 12.3 | 12.8 | V020-009 |
+| BUG-004 | Bug fix | Initialize the complete tray tooltip before the first user action. | 12.3 | 12.8 | V020-013 |
+| CHG-004 | Change | Place the interval range helper text directly below the interval input. | 12.5 | 5.2, 12.8 | V020-014 |
 | FEAT-001 | Feature | Settings offers F15 or paired Scroll Lock; session-only selection. | 12.5 | 12.3, 12.6 | V020-003, V020-004 |
 
-All items also flow through V020-011 and V020-012 for documentation, regression testing, packaging, and release evidence. No separate 0.1.1 release is planned.
+All items also flow through V020-011, V020-012, and the V020-013/014 follow-up tasks for documentation, regression testing, packaging, and release evidence. No separate 0.1.1 release is planned.
 
 ## Agreed behavior summary
 
@@ -42,6 +44,7 @@ Smart Mode (FEAT-002) and its feasibility work are intentionally deferred from 0
 4. V020-005: session/power lifecycle.
 5. V020-009/010: final tooltip and About changes.
 6. V020-011/012: regression verification, user docs, packaging, and recorded Windows checks.
+7. V020-013/014: resolve visual findings from the packaged manual review.
 
 The Status rename and About are independent UI work that can move earlier subject to task dependencies. Each implementation task includes relevant checks; final verification assesses the combined packaged product. Follow CONTRIBUTING.md's per-task commit workflow when development begins.
 
@@ -66,6 +69,7 @@ These are wording/technical validation items; they do not undo approved user-vis
 - During verification, create RELEASE_CHECKLIST.md, QA_WINDOWS_INTEGRATION.md, and QA_SUPPORTED_WINDOWS.md under docs/releases/0.2.0/. Record actual results and artifact hashes/build versions; do not prefill passes.
 - Archive the tested 0.2.0 artifact and matching build metadata without overwriting 0.1.0 evidence. Release date/publication follows readiness, not this planning edit.
 - Current gate: interactive visual checks of Settings, About, and the tooltip remain outstanding; do not merge to `main` or sign off distribution until those checks are recorded.
+- Manual review findings are tracked as BUG-004 and CHG-004 and must be resolved before the release gate closes.
 
 ## Future backlog — not scheduled
 
