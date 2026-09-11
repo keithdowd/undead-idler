@@ -525,7 +525,7 @@ Implementation record: About is immediately above Exit, available in every statu
 
 ### V020-011 Complete regression checks and user documentation
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: V020-009, V020-010.
 - Scope: All approved 0.2.0 items; PRD 12.9; technical 12.9.
 - Run the full automated suite and resolve regressions without real input in unit tests.
@@ -533,6 +533,8 @@ Implementation record: About is immediately above Exit, available in every statu
 - Check scope-to-test coverage and links; preserve historical MVP tasks and release records.
 
 Completion criteria: automated regression suite passes and user instructions accurately describe implemented 0.2.0 behavior.
+
+Implementation record: README now documents the 0.2.0 tray operations, F15 and paired Scroll Lock sequences, session-only settings, Status tooltip fields, About/version display, explicit error behavior, lifecycle stops, Windows 11 validation scope, and Smart Mode deferral. Documentation regression coverage checks the shipped behavior and prevents Smart Mode from being described as available. The full suite passes (110 tests).
 
 ### V020-012 Package and verify release 0.2.0
 
