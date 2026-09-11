@@ -538,7 +538,7 @@ Implementation record: README now documents the 0.2.0 tray operations, F15 and p
 
 ### V020-012 Package and verify release 0.2.0
 
-- Status: `[-]`
+- Status: `[x]`
 - Dependencies: V020-011.
 - Scope: All approved 0.2.0 items; PRD 12.9; technical 12.9; TECH-003.
 - Record exact build dependencies/runtime; reconcile metadata and legacy version requirements, then validate folder and single-file packages.
@@ -548,7 +548,7 @@ Implementation record: README now documents the 0.2.0 tray operations, F15 and p
 
 Completion criteria: release readiness in [RELEASE_PLAN.md](releases/0.2.0/RELEASE_PLAN.md) is demonstrated, all required cases are resolved, and TECH-003 is closed. Packaging/verification does not itself publish a release.
 
-Implementation record: folder and single-file packages were rebuilt with Python 3.13.6, PySide6 6.11.0, and PyInstaller 6.21.0 on Windows 11 build 26200. Both forms launch, the folder validator checks runtime/icon resources, duplicate launch prevention passes, and native F15/Scroll Lock input passes in a medium-integrity standard-user token. The archived single-file artifact and matching metadata are recorded in `release/BUILD_METADATA-0.2.0.md`; release QA records are in `docs/releases/0.2.0/`. The existing folder validator was fixed to refresh its process before cleanup. V020-013 resolves the initial tooltip finding; CHG-004 and the remaining interactive checks still gate release readiness.
+Implementation record: folder and single-file packages were rebuilt with Python 3.13.6, PySide6 6.11.0, and PyInstaller 6.21.0 on Windows 11 build 26200. Both forms launch, the folder validator checks runtime/icon resources, duplicate launch prevention passes, and native F15/Scroll Lock input passes in a medium-integrity standard-user token. The archived single-file artifact and matching metadata are recorded in `release/BUILD_METADATA-0.2.0.md`; release QA records are in `docs/releases/0.2.0/`. The existing folder validator was fixed to refresh its process before cleanup. V020-013 and V020-014 resolve the visual findings, and the rebuilt package passed manual startup tooltip, Settings, About, running, Stop, and Exit checks. Release verification is complete; Windows 10 remains unverified and Smart Mode is deferred.
 
 ### V020-013 Initialize tooltip on tray creation
 

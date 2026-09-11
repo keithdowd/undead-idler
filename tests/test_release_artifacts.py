@@ -46,7 +46,7 @@ def test_020_release_evidence_and_metadata_are_recorded_without_replacing_mvp():
     )
 
     assert "release/UndeadIdler-0.2.0.exe" in checklist
-    assert "110 tests" in checklist
+    assert "113 tests" in checklist
     assert "F15 native injection | Pass" in integration
     assert "Scroll Lock native injection | Pass" in integration
     assert "Windows 10 | Unverified" in supported

@@ -28,9 +28,9 @@ Date: 2026-09-11
 | Settings key selection | Pass (automated) | Settings and runtime model tests cover F15/Scroll Lock and session-only behavior. |
 | Status tooltip | Pass (automated) | Tray tests cover Status, interval, key, timestamp, warnings, and errors. |
 | About/version | Pass (automated) | Tray/About tests cover approved copy, reusable dialog, and shared version `0.2.0`. |
-| Native interactive UI review | Not run | Requires an interactive desktop session outside this restricted shell. |
-| Initial launch tooltip | Pass | V020-013 initializes the complete stopped tooltip before showing the tray icon. |
-| Interval helper-text placement | Pass (source) | V020-014 places the range text directly below Interval; rebuilt-package visual confirmation remains part of final sign-off. |
+| Native interactive UI review | Pass | Rebuilt package reviewed manually: tray menu, Settings, About, tooltip, Start, Stop, and Exit. |
+| Initial launch tooltip | Pass | Rebuilt package shows the complete stopped tooltip before Start. |
+| Interval helper-text placement | Pass | Rebuilt package places the range text directly below Interval and before Key. |
 
-Native input passed in the available medium-integrity standard-user token. Interactive visual checks still require a desktop review before distribution sign-off.
+Native input and interactive visual checks passed in the available medium-integrity standard-user token. Windows 10 remains unverified and Smart Mode is deferred.
 

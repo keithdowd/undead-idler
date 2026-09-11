@@ -1,6 +1,6 @@
 # Undead Idler Release Plan
 
-Planning date: 2026-09-11. Target: **0.2.0**. Status: implementation complete; release verification is in progress. No release date is assigned.
+Planning date: 2026-09-11. Target: **0.2.0**. Status: implementation and release verification complete; merge and distribution approval remain separate actions. No release date is assigned.
 
 ## Document ownership
 
@@ -68,7 +68,7 @@ These are wording/technical validation items; they do not undo approved user-vis
 - Updated README describes implemented behavior and limitations accurately.
 - During verification, create RELEASE_CHECKLIST.md, QA_WINDOWS_INTEGRATION.md, and QA_SUPPORTED_WINDOWS.md under docs/releases/0.2.0/. Record actual results and artifact hashes/build versions; do not prefill passes.
 - Archive the tested 0.2.0 artifact and matching build metadata without overwriting 0.1.0 evidence. Release date/publication follows readiness, not this planning edit.
-- Current gate: BUG-004 and CHG-004 are implemented; do not merge to `main` or sign off distribution until the rebuilt package receives final interactive confirmation.
+- Current gate: BUG-004 and CHG-004 are implemented and the rebuilt package has passed the final interactive checks. The release is ready for review before merging to `main` and distribution sign-off.
 - Manual review findings are tracked as BUG-004 and CHG-004 and must be resolved before the release gate closes.
 
 ## Future backlog — not scheduled

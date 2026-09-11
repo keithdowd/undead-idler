@@ -16,12 +16,12 @@ Verification platform: Windows 11 build 26200, project `.venv`, standard desktop
 
 ## Automated and packaged behavior
 
-- [x] Full automated suite passes: 110 tests.
+- [x] Full automated suite passes: 113 tests.
 - [x] Duplicate folder-package launch exits with code 0 while the original process remains running.
 - [x] Error handling, partial-input cleanup, lifecycle mapping, settings, tooltip, About, and version consistency are covered by automated tests.
 - [x] No startup registration, network service, account requirement, telemetry, or power-setting changes are present in the implementation.
 - [x] Native F15 and Scroll Lock injection passes in an unrestricted medium-integrity standard-user Windows token (2/2 and 4/4 events).
-- [ ] Packaged visual checks of the Settings, About, and tooltip surfaces: not run through an interactive desktop session in this environment.
+- [x] Packaged visual checks of the Settings, About, and tooltip surfaces pass on the rebuilt package.
 - [x] Initial launch tooltip is populated before Start; verified after V020-013.
 - [x] Settings interval helper text is directly below the interval field; resolved by V020-014.
 
@@ -29,6 +29,6 @@ Verification platform: Windows 11 build 26200, project `.venv`, standard desktop
 
 - Windows 11 is the only platform targeted for this release; Windows 10 remains unverified.
 - Smart Mode is deferred and is not included in 0.2.0.
-- Interactive visual checks of Settings, About, and the tooltip remain outstanding before final distribution sign-off.
+- Interactive visual checks of Settings, About, and the tooltip pass on the rebuilt package.
 - BUG-004 and CHG-004 follow-up tasks are resolved; a rebuilt package still requires final visual confirmation.
 
