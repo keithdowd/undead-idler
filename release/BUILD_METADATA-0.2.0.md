@@ -11,7 +11,7 @@
 - PySide6: `6.11.0`
 - PyInstaller: `6.21.0`
 - Build platform: Windows 11, build `26200`
-- Executable source commit: `9d37b1d`
+- Executable source commit: `ac7d262`
 - Release metadata commit: the commit containing this metadata file
 
 The archived executable is intentionally excluded from Git. Rebuild it from `packaging/build_single.ps1` and verify its hash before distribution. Native F15 and Scroll Lock input passed in a medium-integrity standard-user token. Interactive UI checks remain outstanding; see the 0.2.0 QA records.
