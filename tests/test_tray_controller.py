@@ -151,6 +151,38 @@ def test_tooltip_shows_automatic_stop_message_in_error_state(qapp):
     assert "Details: input blocked" in tooltip
 
 
+def test_tooltip_shows_initial_start_error_without_three_failure_claim(qapp):
+    controller = ActivityController(
+        input_sender=lambda: InputResult(False, 2, 0, error_message="input blocked")
+    )
+    controller.start()
+
+    tooltip = format_tooltip(controller)
+
+    assert "State: Error" in tooltip
+    assert "Error: Activity could not start." in tooltip
+    assert "three consecutive" not in tooltip
+    assert "Details: input blocked" in tooltip
+
+
+def test_tooltip_shows_warning_for_running_failure(qapp):
+    results = iter(
+        [
+            InputResult(True, 2, 2),
+            InputResult(False, 2, 0, error_message="input blocked"),
+        ]
+    )
+    controller = ActivityController(input_sender=lambda: next(results))
+    controller.start()
+    controller._on_timer_timeout()
+
+    tooltip = format_tooltip(controller)
+
+    assert "State: Running" in tooltip
+    assert "Warning: Input failed (1 of 3 consecutive attempts)." in tooltip
+    assert "Details: input blocked" in tooltip
+
+
 def test_tray_tooltip_refreshes_when_interval_changes(qapp):
     controller = make_controller()
     tray = TrayIconController(controller)

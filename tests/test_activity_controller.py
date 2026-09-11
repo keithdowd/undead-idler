@@ -1,9 +1,6 @@
 import pytest
 
-from undead_idler.activity_controller import (
-    ActivityController,
-    InvalidActivityTransition,
-)
+from undead_idler.activity_controller import ActivityController
 from undead_idler.models import ActivityState, format_timestamp
 from undead_idler.settings_controller import RuntimeSettings
 from undead_idler.win_input import InputResult
@@ -102,11 +99,11 @@ def test_running_activity_can_stop_or_fail_and_error_can_retry():
     assert controller.state is ActivityState.STOPPED
 
 
-def test_invalid_transition_is_rejected():
+def test_error_transition_is_allowed_from_stopped():
     controller = make_controller(input_sender=successful_input)
 
-    with pytest.raises(InvalidActivityTransition):
-        controller.fail()
+    assert controller.fail() is True
+    assert controller.state is ActivityState.ERROR
 
 
 def test_start_sends_immediately_and_records_success_timestamp():
@@ -124,14 +121,29 @@ def test_start_sends_immediately_and_records_success_timestamp():
 
 
 def test_failed_initial_keypress_does_not_start_or_record_timestamp():
-    controller = make_controller(input_sender=failed_input)
+    timer = FakeTimer()
+    controller = make_controller(input_sender=failed_input, timer=timer)
 
     assert controller.start() is False
-    assert controller.state is ActivityState.STOPPED
+    assert controller.state is ActivityState.ERROR
+    assert timer.isActive() is False
     assert controller.last_input_result.error_message == "input blocked"
     assert controller.consecutive_failures == 1
     assert controller.error_message == "input blocked"
     assert controller.last_successful_keypress is None
+
+
+def test_failed_start_emits_error_state_and_can_retry_in_normal_mode():
+    results = iter([failed_input(), successful_input()])
+    controller = make_controller(input_sender=lambda: next(results))
+    changes = []
+    controller.state_changed.connect(changes.append)
+
+    assert controller.start() is False
+    assert changes == [ActivityState.ERROR]
+    assert controller.start() is True
+    assert controller.state is ActivityState.RUNNING
+    assert controller.consecutive_failures == 0
 
 
 def test_start_configures_and_starts_one_timer():
@@ -231,6 +243,20 @@ def test_successful_keypress_resets_failure_count_and_error_message():
     assert controller.state is ActivityState.RUNNING
     assert controller.consecutive_failures == 0
     assert controller.error_message is None
+
+
+def test_first_and_second_running_failures_remain_running():
+    results = iter([successful_input(), failed_input(), failed_input()])
+    timer = FakeTimer()
+    controller = make_controller(input_sender=lambda: next(results), timer=timer)
+
+    controller.start()
+    timer.timeout.emit()
+    assert controller.state is ActivityState.RUNNING
+    assert controller.consecutive_failures == 1
+    timer.timeout.emit()
+    assert controller.state is ActivityState.RUNNING
+    assert controller.consecutive_failures == 2
 
 
 def test_start_retries_after_automatic_error():

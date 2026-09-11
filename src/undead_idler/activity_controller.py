@@ -28,7 +28,7 @@ class ActivityController(QObject):
     error_changed = Signal(object)
 
     _allowed_transitions = {
-        ActivityState.STOPPED: {ActivityState.RUNNING},
+        ActivityState.STOPPED: {ActivityState.RUNNING, ActivityState.ERROR},
         ActivityState.RUNNING: {ActivityState.STOPPED, ActivityState.ERROR},
         ActivityState.ERROR: {ActivityState.STOPPED, ActivityState.RUNNING},
     }
@@ -115,6 +115,8 @@ class ActivityController(QObject):
         self._last_input_result = result
         if not result.success:
             self._record_failure(result)
+            if self._state is ActivityState.STOPPED:
+                self.transition_to(ActivityState.ERROR)
             return False
 
         self._record_successful_keypress()

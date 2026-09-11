@@ -30,11 +30,18 @@ def format_tooltip(activity_controller: ActivityController) -> str:
         f"Interval: {activity_controller.interval_minutes} minutes",
         f"Last successful keypress: {activity_controller.last_successful_keypress_text}",
     ]
-    if (
-        activity_controller.state is ActivityState.ERROR
-        and activity_controller.consecutive_failures >= 3
-    ):
-        lines.append("Error: Activity stopped after 3 consecutive failures.")
+    if activity_controller.state is ActivityState.ERROR:
+        if activity_controller.consecutive_failures >= 3:
+            lines.append("Error: Activity stopped after 3 consecutive failures.")
+        else:
+            lines.append("Error: Activity could not start.")
+        if activity_controller.error_message:
+            lines.append(f"Details: {activity_controller.error_message}")
+    elif activity_controller.consecutive_failures:
+        lines.append(
+            "Warning: Input failed "
+            f"({activity_controller.consecutive_failures} of 3 consecutive attempts)."
+        )
         if activity_controller.error_message:
             lines.append(f"Details: {activity_controller.error_message}")
     return "\n".join(lines)

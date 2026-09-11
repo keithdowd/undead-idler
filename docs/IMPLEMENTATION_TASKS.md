@@ -405,7 +405,7 @@ Implementation record: the application acquires a per-user/session Windows named
 
 ### V020-002 Implement explicit error policy and warnings
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: V020-001.
 - Scope: BUG-003; PRD 12.8; technical 12.4.
 - Support Stopped -> Error on initial failure and normal-mode retry from Error.
@@ -414,6 +414,8 @@ Implementation record: the application acquires a per-user/session Windows named
 - Test initial failure/retry, successful reset, all thresholds, timestamp preservation, and truthful tooltip reasons with mocked results. Native partial cleanup follows in V020-004.
 
 Completion criteria: errors are visible at every stage; no retry timer survives Error, and no message incorrectly claims three failures for another cause.
+
+Implementation record: failed Start transitions from Stopped to Error with the timer inactive. Running failures one and two remain Running with visible warning details; the third transitions to Error. Successful input clears the failure count and warning, and retrying from Error starts in normal mode. Focused controller/tray tests and the full suite pass (89 tests). Partial-submission cleanup remains assigned to V020-004.
 
 ### V020-003 Add key selection and complete sequences
 
