@@ -8,6 +8,7 @@ from collections.abc import Sequence
 from PySide6.QtWidgets import QApplication
 
 from .activity_controller import ActivityController
+from .instance_guard import acquire_instance
 from .tray_controller import TrayIconController
 
 
@@ -26,7 +27,15 @@ def run_application(application: QApplication) -> int:
 
 def main(argv: Sequence[str] | None = None) -> int:
     """Start the tray application in its initial stopped state."""
-    application = create_application(argv)
-    activity_controller = ActivityController(parent=application)
-    TrayIconController(activity_controller, parent=application)
-    return run_application(application)
+    instance_guard = acquire_instance()
+    if instance_guard is None:
+        return 0
+
+    try:
+        application = create_application(argv)
+        activity_controller = ActivityController(parent=application)
+        TrayIconController(activity_controller, parent=application)
+        application.aboutToQuit.connect(instance_guard.release)
+        return run_application(application)
+    finally:
+        instance_guard.release()

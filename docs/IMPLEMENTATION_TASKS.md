@@ -388,11 +388,11 @@ The custom icon task can proceed in parallel with the input adapter and activity
 
 ## Release 0.2.0: Planned implementation
 
-All tasks below are not started. Dependencies reference new tasks; the completed MVP is the baseline. Scope IDs refer to [RELEASE_PLAN.md](releases/0.2.0/RELEASE_PLAN.md). Follow the existing per-task implementation/commit workflow; these documentation edits do not authorize starting development.
+Tasks below are completed, in progress, or not started. Dependencies reference new tasks; the completed MVP is the baseline. Scope IDs refer to [RELEASE_PLAN.md](releases/0.2.0/RELEASE_PLAN.md). Follow the existing per-task implementation/commit workflow.
 
 ### V020-001 Prevent duplicate instances
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: None (MVP baseline).
 - Scope: BUG-001; PRD 12.2; technical 12.2.
 - Add an atomic per-user/session instance guard before UI or input initialization; release resources at exit.
@@ -400,6 +400,8 @@ All tasks below are not started. Dependencies reference new tasks; the completed
 - Validate sequential and simultaneous launch, original status/interval preservation, clean exit, and crash/relaunch behavior.
 
 Completion criteria: exactly one tray/input owner exists per session; later legitimate launches are not blocked by stale state. Packaged validation also runs in V020-012.
+
+Implementation record: the application acquires a per-user/session Windows named mutex before creating QApplication or tray UI. Duplicate launches return cleanly, and the native handle is released idempotently during shutdown. Unit coverage verifies duplicate rejection, handle cleanup, no-op non-Windows behavior, and bootstrap short-circuiting. Full suite result: 85 passed with the project source path configured.
 
 ### V020-002 Implement explicit error policy and warnings
 
