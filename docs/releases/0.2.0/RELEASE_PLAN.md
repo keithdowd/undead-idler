@@ -68,7 +68,7 @@ These are wording/technical validation items; they do not undo approved user-vis
 - Updated README describes implemented behavior and limitations accurately.
 - During verification, create RELEASE_CHECKLIST.md, QA_WINDOWS_INTEGRATION.md, and QA_SUPPORTED_WINDOWS.md under docs/releases/0.2.0/. Record actual results and artifact hashes/build versions; do not prefill passes.
 - Archive the tested 0.2.0 artifact and matching build metadata without overwriting 0.1.0 evidence. Release date/publication follows readiness, not this planning edit.
-- Current gate: interactive visual checks of Settings, About, and the tooltip remain outstanding; do not merge to `main` or sign off distribution until those checks are recorded.
+- Current gate: the interval helper-text placement remains outstanding; do not merge to `main` or sign off distribution until CHG-004 is resolved and the remaining interactive checks are recorded.
 - Manual review findings are tracked as BUG-004 and CHG-004 and must be resolved before the release gate closes.
 
 ## Future backlog — not scheduled

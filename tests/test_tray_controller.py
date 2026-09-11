@@ -33,6 +33,17 @@ def test_tray_controller_starts_with_stopped_icon(qapp):
     assert tray.tray_icon.isVisible()
 
 
+def test_tray_controller_initializes_tooltip_before_start(qapp):
+    tray = TrayIconController(make_controller())
+
+    assert tray.tray_icon.toolTip() == (
+        "Status: Stopped\n"
+        "Interval: 5 minutes\n"
+        "Key: F15\n"
+        "Last keypress: None"
+    )
+
+
 @pytest.mark.parametrize(
     ("state", "filename"),
     [

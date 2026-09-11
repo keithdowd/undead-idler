@@ -106,6 +106,7 @@ class TrayIconController(QObject):
         self._shutdown_complete = False
         self._about_dialog: AboutDialog | None = None
         self.set_state(ActivityState.STOPPED)
+        self._refresh_tooltip()
         self.tray_icon.show()
 
     @property

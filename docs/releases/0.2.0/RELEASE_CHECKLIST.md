@@ -22,7 +22,7 @@ Verification platform: Windows 11 build 26200, project `.venv`, standard desktop
 - [x] No startup registration, network service, account requirement, telemetry, or power-setting changes are present in the implementation.
 - [x] Native F15 and Scroll Lock injection passes in an unrestricted medium-integrity standard-user Windows token (2/2 and 4/4 events).
 - [ ] Packaged visual checks of the Settings, About, and tooltip surfaces: not run through an interactive desktop session in this environment.
-- [ ] Initial launch tooltip is populated before Start: manual review found the tooltip absent until Start.
+- [x] Initial launch tooltip is populated before Start; verified after V020-013.
 - [ ] Settings interval helper text is directly below the interval field: manual review found it below the Key selector.
 
 ## Release limitations
