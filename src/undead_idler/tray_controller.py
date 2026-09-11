@@ -26,9 +26,10 @@ def format_tooltip(activity_controller: ActivityController) -> str:
     """Format the tray tooltip from the current runtime state."""
     state = activity_controller.state.value.title()
     lines = [
-        f"State: {state}",
+        f"Status: {state}",
         f"Interval: {activity_controller.interval_minutes} minutes",
-        f"Last successful keypress: {activity_controller.last_successful_keypress_text}",
+        f"Key: {activity_controller.key.value}",
+        f"Last keypress: {activity_controller.last_successful_keypress_text}",
     ]
     if activity_controller.state is ActivityState.ERROR:
         if activity_controller.consecutive_failures >= 3:
@@ -85,6 +86,7 @@ class TrayIconController(QObject):
         self.activity_controller.state_changed.connect(self.set_state)
         self.activity_controller.state_changed.connect(self._refresh_tooltip)
         self.activity_controller.interval_changed.connect(self._refresh_tooltip)
+        self.activity_controller.key_changed.connect(self._refresh_tooltip)
         self.activity_controller.last_successful_keypress_changed.connect(
             self._refresh_tooltip
         )

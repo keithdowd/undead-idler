@@ -5,6 +5,7 @@ from PySide6.QtWidgets import QApplication
 
 from undead_idler.activity_controller import ActivityController
 from undead_idler.models import ActivityState
+from undead_idler.models import SimulatedKey
 from undead_idler.tray_controller import (
     TrayIconController,
     format_tooltip,
@@ -121,9 +122,12 @@ def test_tooltip_shows_stopped_state_interval_and_none_timestamp(qapp):
 
     tooltip = format_tooltip(controller)
 
-    assert "State: Stopped" in tooltip
+    assert "Status: Stopped" in tooltip
     assert "Interval: 5 minutes" in tooltip
-    assert "Last successful keypress: None" in tooltip
+    assert "Key: F15" in tooltip
+    assert "Last keypress: None" in tooltip
+    assert "Smart Mode" not in tooltip
+    assert "Activity" not in tooltip
     assert "Error:" not in tooltip
 
 
@@ -133,8 +137,8 @@ def test_tooltip_shows_timestamp_after_successful_start(qapp):
 
     tooltip = format_tooltip(controller)
 
-    assert "State: Running" in tooltip
-    assert "Last successful keypress: None" not in tooltip
+    assert "Status: Running" in tooltip
+    assert "Last keypress: None" not in tooltip
 
 
 def test_tooltip_shows_automatic_stop_message_in_error_state(qapp):
@@ -146,7 +150,7 @@ def test_tooltip_shows_automatic_stop_message_in_error_state(qapp):
 
     tooltip = format_tooltip(controller)
 
-    assert "State: Error" in tooltip
+    assert "Status: Error" in tooltip
     assert "Error: Activity stopped after 3 consecutive failures." in tooltip
     assert "Details: input blocked" in tooltip
 
@@ -159,7 +163,7 @@ def test_tooltip_shows_initial_start_error_without_three_failure_claim(qapp):
 
     tooltip = format_tooltip(controller)
 
-    assert "State: Error" in tooltip
+    assert "Status: Error" in tooltip
     assert "Error: Activity could not start." in tooltip
     assert "three consecutive" not in tooltip
     assert "Details: input blocked" in tooltip
@@ -178,7 +182,7 @@ def test_tooltip_shows_warning_for_running_failure(qapp):
 
     tooltip = format_tooltip(controller)
 
-    assert "State: Running" in tooltip
+    assert "Status: Running" in tooltip
     assert "Warning: Input failed (1 of 3 consecutive attempts)." in tooltip
     assert "Details: input blocked" in tooltip
 
@@ -190,6 +194,15 @@ def test_tray_tooltip_refreshes_when_interval_changes(qapp):
     controller.set_interval(8)
 
     assert "Interval: 8 minutes" in tray.tray_icon.toolTip()
+
+
+def test_tray_tooltip_refreshes_when_key_changes(qapp):
+    controller = make_controller()
+    tray = TrayIconController(controller)
+
+    controller.set_key(SimulatedKey.SCROLL_LOCK)
+
+    assert "Key: Scroll Lock" in tray.tray_icon.toolTip()
 
 
 def test_shutdown_stops_activity_hides_icon_and_detaches_menu(qapp, monkeypatch):

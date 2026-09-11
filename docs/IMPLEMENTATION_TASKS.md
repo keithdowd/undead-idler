@@ -499,7 +499,7 @@ Completion criteria: deterministic fake-clock tests demonstrate all PRD Smart Mo
 
 ### V020-009 Finish status and tooltip presentation
 
-- Status: `[ ]`
+- Status: `[x]`
 - Dependencies: V020-003, V020-005.
 - Scope: CHG-001, CHG-003; PRD 12.3; technical 12.8.
 - Show Status, Interval, Key, and Last keypress; no Smart Mode or Activity line in 0.2.0.
@@ -507,6 +507,8 @@ Completion criteria: deterministic fake-clock tests demonstrate all PRD Smart Mo
 - Test all statuses, keys/modes, None/time formatting, and error variants; verify native tooltip readability/length during release checks.
 
 Completion criteria: no user-facing State label remains in the affected tray display and required fields stay readable.
+
+Implementation record: the tray now labels the field Status and shows Status, Interval, Key, and Last keypress. Smart Mode and Activity are absent from the 0.2.0 tooltip. Tooltip refreshes now include selected-key changes, and warning/error details remain visible. Tray tests and the full suite pass (108 tests).
 
 ### V020-010 Add About and shared version metadata
 
