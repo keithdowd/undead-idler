@@ -52,3 +52,23 @@ def test_020_release_evidence_and_metadata_are_recorded_without_replacing_mvp():
     assert "Windows 10 | Unverified" in supported
     assert "Release: `0.2.0`" in metadata
     assert "3489EF9CA1B940DDB0F67BFBAB7C082B094F70F688538CCD3BE1D3E46524AA21" in metadata
+
+
+def test_020_distribution_zip_has_expected_contents_and_recorded_hash():
+    from zipfile import ZipFile
+    import hashlib
+
+    archive = PROJECT_ROOT / "release" / "0.2.0" / "Undead-Idler-0.2.0.zip"
+    checklist = (PROJECT_ROOT / "docs" / "releases" / "0.2.0" / "RELEASE_CHECKLIST.md").read_text(
+        encoding="utf-8"
+    )
+
+    assert archive.is_file()
+    with ZipFile(archive) as zip_file:
+        assert zip_file.namelist() == ["UndeadIdler.exe", "README.md", "BUILD_METADATA.md"]
+    expected_hash = next(
+        line.split("`", 2)[1]
+        for line in checklist.splitlines()
+        if line.startswith("Distribution ZIP SHA-256:")
+    )
+    assert hashlib.sha256(archive.read_bytes()).hexdigest().upper() == expected_hash

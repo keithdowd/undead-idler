@@ -550,6 +550,18 @@ Completion criteria: release readiness in [RELEASE_PLAN.md](releases/0.2.0/RELEA
 
 Implementation record: folder and single-file packages were rebuilt with Python 3.13.6, PySide6 6.11.0, and PyInstaller 6.21.0 on Windows 11 build 26200. Both forms launch, the folder validator checks runtime/icon resources, duplicate launch prevention passes, and native F15/Scroll Lock input passes in a medium-integrity standard-user token. The archived single-file artifact and matching metadata are recorded in `release/0.2.0/BUILD_METADATA.md`; release QA records are in `docs/releases/0.2.0/`. The existing folder validator was fixed to refresh its process before cleanup. V020-013 and V020-014 resolve the visual findings, and the rebuilt package passed manual startup tooltip, Settings, About, running, Stop, and Exit checks. Release verification is complete; Windows 10 remains unverified and Smart Mode is deferred.
 
+### V020-015 Create and verify the 0.2.0 distribution ZIP
+
+- Status: `[x]`
+- Dependencies: V020-012, V020-014.
+- Scope: Release packaging follow-up; PRD 12.9; technical 12.9.
+- Create `release/0.2.0/Undead-Idler-0.2.0.zip` containing the single executable as `UndeadIdler.exe`, `README.md`, and `BUILD_METADATA.md`.
+- Verify the archive opens, contains exactly those files, and record its size and SHA-256 without replacing the executable hash.
+
+Completion criteria: the versioned distribution ZIP is reproducibly assembled from the verified 0.2.0 artifact and its contents are recorded in release evidence.
+
+Implementation record: the 0.2.0 ZIP contains `UndeadIdler.exe`, `README.md`, and `BUILD_METADATA.md`. Archive verification reports 45,140,561 bytes and SHA-256 `806B1090C741136D5D0E70E8645899B3480ACFD243A43893950C1316EDF715F4`; the full suite passes (113 tests).
+
 ### V020-013 Initialize tooltip on tray creation
 
 - Status: `[x]`

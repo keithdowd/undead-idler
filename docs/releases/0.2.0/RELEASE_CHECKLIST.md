@@ -13,6 +13,12 @@ Verification platform: Windows 11 build 26200, project `.venv`, standard desktop
 - [x] Single-file package launches without a console window (`MainWindowHandle = 0`) and remains running for five seconds.
 - [x] Release artifact is archived at `release/0.2.0/UndeadIdler-0.2.0.exe`.
 - [x] Matching SHA-256 and build metadata are recorded in `release/0.2.0/BUILD_METADATA.md`.
+- [x] Distribution ZIP is archived at `release/0.2.0/Undead-Idler-0.2.0.zip` with the executable, README, and build metadata.
+- [x] Distribution ZIP contents, size, and SHA-256 are recorded below.
+
+Distribution ZIP SHA-256: `806B1090C741136D5D0E70E8645899B3480ACFD243A43893950C1316EDF715F4`
+
+Distribution ZIP size: `45,140,561` bytes
 
 ## Automated and packaged behavior
 

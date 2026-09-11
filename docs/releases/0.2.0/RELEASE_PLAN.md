@@ -45,6 +45,7 @@ Smart Mode (FEAT-002) and its feasibility work are intentionally deferred from 0
 5. V020-009/010: final tooltip and About changes.
 6. V020-011/012: regression verification, user docs, packaging, and recorded Windows checks.
 7. V020-013/014: resolve visual findings from the packaged manual review.
+8. V020-015: create and verify the versioned distribution ZIP.
 
 The Status rename and About are independent UI work that can move earlier subject to task dependencies. Each implementation task includes relevant checks; final verification assesses the combined packaged product. Follow CONTRIBUTING.md's per-task commit workflow when development begins.
 
