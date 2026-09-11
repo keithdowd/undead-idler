@@ -10,7 +10,7 @@ Date: 2026-09-11
 - PyInstaller: `6.21.0`
 - Folder package: `dist/UndeadIdler/UndeadIdler.exe`
 - Single-file package: `dist/UndeadIdler.exe`
-- Archived artifact: `release/UndeadIdler-0.2.0.exe`
+- Archived artifact: `release/0.2.0/UndeadIdler-0.2.0.exe`
 
 ## Results
 

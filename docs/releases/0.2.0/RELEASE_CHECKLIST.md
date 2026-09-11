@@ -11,8 +11,8 @@ Verification platform: Windows 11 build 26200, project `.venv`, standard desktop
 - [x] Folder package launches and remains running during the validator check.
 - [x] Single-file PyInstaller build completed.
 - [x] Single-file package launches without a console window (`MainWindowHandle = 0`) and remains running for five seconds.
-- [x] Release artifact is archived at `release/UndeadIdler-0.2.0.exe`.
-- [x] Matching SHA-256 and build metadata are recorded in `release/BUILD_METADATA-0.2.0.md`.
+- [x] Release artifact is archived at `release/0.2.0/UndeadIdler-0.2.0.exe`.
+- [x] Matching SHA-256 and build metadata are recorded in `release/0.2.0/BUILD_METADATA.md`.
 
 ## Automated and packaged behavior
 

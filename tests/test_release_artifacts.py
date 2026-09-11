@@ -8,19 +8,19 @@ def test_release_checklist_and_metadata_exist():
     checklist = (PROJECT_ROOT / "docs" / "releases" / "0.1.0" / "RELEASE_CHECKLIST.md").read_text(
         encoding="utf-8"
     )
-    metadata = (PROJECT_ROOT / "release" / "BUILD_METADATA.md").read_text(
+    metadata = (PROJECT_ROOT / "release" / "0.1.0" / "BUILD_METADATA.md").read_text(
         encoding="utf-8"
     )
 
-    assert "release/UndeadIdler-0.1.0.exe" in checklist
+    assert "release/0.1.0/UndeadIdler-0.1.0.exe" in checklist
     assert "Full automated suite passes" in checklist
     assert "SHA-256" in metadata
     assert "PyInstaller: `6.21.0`" in metadata
 
 
 def test_archived_release_binary_matches_metadata_hash():
-    binary = PROJECT_ROOT / "release" / "UndeadIdler-0.1.0.exe"
-    metadata = (PROJECT_ROOT / "release" / "BUILD_METADATA.md").read_text(
+    binary = PROJECT_ROOT / "release" / "0.1.0" / "UndeadIdler-0.1.0.exe"
+    metadata = (PROJECT_ROOT / "release" / "0.1.0" / "BUILD_METADATA.md").read_text(
         encoding="utf-8"
     )
 
@@ -41,11 +41,11 @@ def test_020_release_evidence_and_metadata_are_recorded_without_replacing_mvp():
     checklist = (release_docs / "RELEASE_CHECKLIST.md").read_text(encoding="utf-8")
     integration = (release_docs / "QA_WINDOWS_INTEGRATION.md").read_text(encoding="utf-8")
     supported = (release_docs / "QA_SUPPORTED_WINDOWS.md").read_text(encoding="utf-8")
-    metadata = (PROJECT_ROOT / "release" / "BUILD_METADATA-0.2.0.md").read_text(
+    metadata = (PROJECT_ROOT / "release" / "0.2.0" / "BUILD_METADATA.md").read_text(
         encoding="utf-8"
     )
 
-    assert "release/UndeadIdler-0.2.0.exe" in checklist
+    assert "release/0.2.0/UndeadIdler-0.2.0.exe" in checklist
     assert "113 tests" in checklist
     assert "F15 native injection | Pass" in integration
     assert "Scroll Lock native injection | Pass" in integration

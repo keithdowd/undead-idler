@@ -17,7 +17,7 @@ Date: 2026-09-10
 
 ## Release Checks
 
-- [x] Single executable is archived at `release/UndeadIdler-0.1.0.exe`.
+- [x] Single executable is archived at `release/0.1.0/UndeadIdler-0.1.0.exe`.
 - [x] Executable starts without a separate Python installation.
 - [x] Executable uses a windowed/no-console build.
 - [x] No startup registration or scheduled task is created.
