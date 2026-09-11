@@ -1,5 +1,9 @@
 # Undead Idler Product Requirements Document
 
+## Release scope
+
+Sections 1-11 preserve the original 0.1.0 MVP requirements. Section 12 is the planned 0.2.0 specification and supersedes conflicting MVP requirements for that release only. Section 12.6 records a deferred future-release concept and is excluded from 0.2.0 scope. Planned requirements do not describe shipped functionality. See [release plan](releases/0.2.0/RELEASE_PLAN.md) and [0.1.0 evidence](releases/0.1.0/RELEASE_CHECKLIST.md).
+
 ## 1. Product Summary
 
 Undead Idler is a local Windows tray application that manually generates periodic F15 keyboard input while enabled. Its intended use is to prevent supported applications such as Microsoft Teams and Outlook from interpreting the user as idle or away.
@@ -173,3 +177,81 @@ The next document should define:
 - Single-executable packaging and build configuration.
 - Custom icon asset format and packaging.
 - Automated and manual test strategy.
+
+## 12. Planned 0.2.0 requirements
+
+Status: approved planning scope; implementation and release verification not started.
+
+### 12.1 Scope and retained constraints
+
+The release adds selectable input while retaining manual launch, Windows 10/11 support, no console, no administrator requirement for normal operation, and a single packaged executable. Smart Mode is deferred to a future release. It does not prevent lock or sleep, directly control presence, add startup registration, persist settings, or collect input history or telemetry. Configurable keys are now limited to F15 and Scroll Lock; the MVP fixed-key restriction is superseded. Notifications, Explorer tray recovery work, Smart Mode, and a broader accessibility review remain unscheduled backlog items.
+
+### 12.2 BUG-001: Single instance
+
+Only one instance may run per Windows user session. A duplicate launch must exit silently before creating UI, monitoring, or an input loop. It must not close or modify the existing instance. Simultaneous launches must yield one instance. Normal exit and crashes must not prevent a later launch.
+
+### 12.3 CHG-001, CHG-003: Status and tooltip
+
+Replace the user-facing label `State` with `Status`. Values remain `Running`, `Stopped`, and `Error`. No Smart Mode or Activity line is included in the 0.2.0 tooltip.
+
+The tooltip must show these fields in every status, refreshing when values change:
+
+```text
+Status: Running
+Interval: 5 minutes
+Key: Scroll Lock
+Last keypress: 2026-09-11 14:32:00
+```
+
+Use `On`/`Off`, local time formatted `YYYY-MM-DD HH:mm:ss`, and `None` before a successful sequence. Preserve the timestamp through Stop and Error within the session. Append concise warnings or error reasons as appropriate; do not claim three failures for other error causes.
+
+### 12.4 CHG-002: About
+
+Add About immediately above Exit in the tray menu. It is available in all statuses and opens one reusable dialog with OK; repeated selection brings the existing dialog forward. Opening or closing it does not change status or settings. Future Smart Mode behavior will define how dialog interaction counts as activity.
+
+Approved description:
+
+> A Windows tray utility that generates periodic F15 or paired Scroll Lock keypresses while running to maintain local keyboard activity. Start and stop activity manually, and configure the interval in Settings.
+>
+> Undead Idler does not directly control application presence or prevent your computer from sleeping.
+
+Show `Undead Idler` and the actual application release version from shared version metadata (0.2.0 for this release, not the earlier example's 0.1.0). The description above reflects the selectable F15 and Scroll Lock keys.
+
+### 12.5 FEAT-001: Key selection
+
+Settings offers F15 or Scroll Lock alongside the existing whole-minute interval (1-10, default 5). F15 is the launch default; key selection is session-only. Each activity event sends one complete F15 press or two consecutive complete Scroll Lock presses. This applies to immediate Start and subsequent events. A successful Scroll Lock pair normally restores the original toggle state; failure handling must not promise restoration after partial submission.
+
+Save validates all fields before applying either. Cancel or invalid input keeps prior settings. Key-only changes affect the next sequence without resetting its schedule. Interval changes restart timing with the new interval; combined changes use the new key and interval. Save without changes has no timing side effect. Settings never contains Smart Mode.
+
+### 12.6 Deferred FEAT-002: Smart Mode
+
+Smart Mode is deferred from 0.2.0 and is retained here as a future-release concept. It is not part of the 0.2.0 acceptance criteria or implementation sequence.
+
+Smart Mode is a checkable tray option, off by default and unavailable while Stopped or Error. Start first attempts an immediate sequence in normal mode. Only a successful Start makes Smart Mode available. Enabling it cancels normal timing and starts a fresh idle countdown. Disabling it schedules the next normal sequence one full configured interval later, without immediate input.
+
+Smart Mode uses the same Settings interval for both idle detection and repeated sequences. Keyboard down/up, mouse movement, button down/up, and scrolling count as activity. Held keys/buttons are ongoing activity; count idle time only after all are released. Activity resets the countdown, pauses future sequences, and does not change Running status. After one full idle interval, send a sequence, then repeat at that interval until activity resumes. Ignore this application's tagged input; count other observed input, including accessibility-generated input. Touch, pen, controllers, and remote-session support are not promised by this scope.
+
+Changing the interval restarts the idle countdown. Changing only the key does not independently reset it. Interaction with Settings or other UI still counts as user activity, including Cancel and unchanged Save. If input arrives during an already-submitted sequence, finish that sequence and restart idle timing from the user activity; held-input rules still apply.
+
+Stop turns Smart Mode off, makes it unavailable, stops timing and monitoring, and preserves session settings. Every later Start begins in normal mode.
+
+### 12.7 BUG-002: Session and power transitions
+
+Lock, sleep, or hibernate invokes Stop behavior: cancel future input and monitoring, turn Smart Mode off, and show Stopped. Unlock and resume remain Stopped and require manual Start. Shutdown/restart stops activity and exits cleanly without blocking shutdown; the next launch is Stopped. These rules apply to normal mode and Smart Mode, including pending callbacks.
+
+### 12.8 BUG-003: Errors in normal mode
+
+| Outcome | Required behavior |
+| --- | --- |
+| Complete sequence submitted | Update success timestamp; clear warning and consecutive-failure count. |
+| Start submits no events | Enter Error immediately, stop timers, show reason, require manual retry. |
+| Running sequence submits no events: failure 1 or 2 | Stay Running, show warning with count, retry at next eligible interval. |
+| Third consecutive zero-event failure while Running | Enter Error and cancel timing. |
+| Partial sequence, including partial F15 | Attempt bounded key-release cleanup; enter Error immediately; do not blindly replay or toggle Scroll Lock. |
+| Smart Mode monitoring cannot initialize | Deferred with Smart Mode; not a 0.2.0 case. |
+
+Failed attempts and cleanup do not update the success timestamp. Start from Error clears the count and attempts normal-mode input again. Partial Scroll Lock failure must explain `Input sequence incomplete. Check Scroll Lock state.` No notification dialog is required. Smart Mode error behavior is deferred with FEAT-002.
+
+### 12.9 Release acceptance
+
+All in-scope requirements in 12.2-12.5, 12.7, and 12.8 must have automated or recorded Windows verification, including simultaneous launches/crash recovery, both keys, all failure classes, settings changes, and session/power transitions. Deferred section 12.6 is excluded from 0.2.0 acceptance. Retained MVP behavior must not regress. The packaged build must display its actual version, run without Python or elevation, and have Windows 11 evidence. Windows 10 remains a documented target platform but is unverified for 0.2.0; no Windows 10 support claim may be presented as tested. No 0.1.0 pass record establishes a 0.2.0 pass.

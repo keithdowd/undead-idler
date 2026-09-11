@@ -1,5 +1,9 @@
 # Undead Idler Technical Requirements
 
+## Release scope
+
+Sections 1-11 preserve the original MVP design. Section 12 defines planned 0.2.0 behavior and supersedes conflicting MVP design for that release, including fixed F15, Settings contents, and error rules. Section 12.5-12.6 is retained as deferred Smart Mode design and is excluded from 0.2.0. See [PRD](PRD.md#12-planned-020-requirements), [release plan](releases/0.2.0/RELEASE_PLAN.md), and [tasks](IMPLEMENTATION_TASKS.md#release-020-planned-implementation). No 0.2.0 functionality or QA completion is implied.
+
 ## 1. Purpose
 
 This document translates the requirements in `docs/PRD.md` into an implementation design and ordered build sequence for the Undead Idler MVP.
@@ -428,3 +432,90 @@ Exit criteria: the packaged single executable runs independently of a Python ins
 6. Record known limitations, including that the application does not directly control Teams or Outlook presence and does not prevent sleep.
 
 Exit criteria: all PRD acceptance criteria are demonstrated and known limitations are documented.
+
+## 12. Planned 0.2.0 design
+
+### 12.1 Components and ordering
+
+Extend the existing architecture with an instance guard and a session/power event adapter. Smart Mode monitoring is deferred and is not part of the 0.2.0 architecture. The activity controller remains the owner of status, failure counts, and scheduling. Use a monotonic clock for elapsed time and local wall time only for display timestamps.
+
+Implementation sequence: instance guard; errors; selectable sequences; system transitions; final UI; release verification. Smart Mode feasibility and orchestration are future-release work. See release tasks for exact dependencies.
+
+### 12.2 Single-instance guard (BUG-001)
+
+Proposed mechanism: a Windows named mutex scoped to the current user and Windows session, acquired atomically before tray construction or input setup. Keep its handle for the process lifetime and close it during exit. An already-existing guard causes the new process to return silently; do not signal, stop, or alter the owner. Validate simultaneous launch, crash recovery, and PyInstaller single-file startup rather than relying on process-name searches or stale PID files. Distinguish guard acquisition errors from duplicate detection. Final naming and access handling are implementation details to validate; cross-session exclusion is not required.
+
+### 12.3 Input adapter and results (FEAT-001, BUG-003)
+
+Represent the selected key with a validated enum. Construct one SendInput batch per event: F15 down/up (2 events) or Scroll Lock down/up/down/up (4 events). Put an application-specific pointer-sized marker in every event's dwExtraInfo, including cleanup events. A listener ignores only our marked events, not all injected input.
+
+Return structured results that distinguish full, zero, and partial submission, including requested/submitted counts and useful diagnostics. Count failures per sequence, not per individual press. Never infer that successful submission proves a target application's presence or toggle behavior.
+
+For partial submission, perform at most a bounded, best-effort release of the potentially held simulated key, then report immediate Error. Do not replay the batch or send speculative toggle corrections. Cleanup is not success and cannot reset the failure count or timestamp. Avoid claiming the original Scroll Lock state was restored. Validate the cleanup algorithm against the API's guarantees; a returned count alone must not be treated as stronger evidence than documented. Failure to clean up must remain visible in the error reason.
+
+Sources: [SendInput](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput), [KEYBDINPUT](https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-keybdinput). The batch orders submitted events without interleaving other user input; it is not a guarantee that every event succeeds.
+
+### 12.4 Failure state transitions
+
+Allow Stopped -> Error for unsuccessful Start. Start from either Stopped or Error clears transient failures and attempts the selected sequence immediately. Full success enters Running and schedules the next event; any Start failure enters Error without a retry timer.
+
+During Running, zero-submission failures 1 and 2 preserve Running with a warning; failure 3 enters Error. Full success clears failures and updates time. Partial submission enters Error immediately after bounded cleanup. Smart Mode failure behavior is deferred.
+
+Centralize Error entry: invalidate pending work, cancel timers, retain last success, and emit reason/status updates. Stop clears transient errors and retains interval, key, and last success. Start is idempotent while Running.
+
+### 12.5 Deferred activity monitor (FEAT-002)
+
+This section is deferred from 0.2.0 and retained for a future Smart Mode release. It is not a 0.2.0 implementation dependency.
+
+Planned v1 approach: one Windows low-level keyboard and mouse hook monitor on a dedicated thread with a message loop. Run it only while Smart Mode is on. Callbacks must promptly forward events through the hook chain, never suppress user input, and avoid UI work, disk writes, or blocking operations. Marshal only minimal activity/held-state information to the controller using thread-safe notification and coalesce high-frequency mouse movement without losing the latest activity time or releases. This first build does not implement Raw Input fallback, automatic hook recovery, remote-session monitoring, extra device classes, or monitoring telemetry.
+
+Ignore our marker and count other observed events, including injected accessibility input. Track key identities only while needed to maintain the held set, mouse-button states, and last activity time. Do not decode text, retain event history, log key identifiers, or collect application/window content. Include vertical and horizontal scrolling. Repeated key-down does not create duplicate held entries; releases remove them. Reconcile keys/buttons already held when monitoring starts and test missed-release/multiple-device behavior so tracking cannot incorrectly authorize idle input.
+
+Keep elapsed-time scheduling independent of system clock changes. Recheck current activity and held state at dispatch, not only when scheduling. A generation/cancellation token or equivalent must reject callbacks queued before Stop, Error, a mode change, or a system transition. The first-build monitor needs only a small held-key/button set and one latest-activity timestamp; it does not retain event history.
+
+Technical validation gate: [Microsoft's hook guidance](https://learn.microsoft.com/en-us/windows/win32/winmsg/lowlevelkeyboardproc) warns that timed-out hooks can be removed silently and recommends considering Raw Input. For v1, validate only callback latency, startup held-state reconciliation, own-input filtering, clean start/stop, packaged standard-user operation, and UI responsiveness on Windows 11. Do not claim every hook loss is detectable. If a core v1 case fails, stop before production integration and revisit the design; do not silently weaken product behavior. Known monitoring initialization failure enters Error.
+
+Additional references: [keyboard event metadata](https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-kbdllhookstruct), [mouse callback](https://learn.microsoft.com/en-us/windows/win32/winmsg/lowlevelmouseproc), [GetAsyncKeyState](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getasynckeystate). Validate asynchronous held-state queries outside the hook callback, whose event can precede the state update.
+
+### 12.6 Deferred Smart Mode scheduling and Settings
+
+This section is deferred from 0.2.0 and retained for a future Smart Mode release. It is not a 0.2.0 implementation dependency.
+
+Smart Mode is a boolean orthogonal to Running/Stopped/Error; no public Waiting or Active substatus is introduced. It can be true only while Running.
+
+| Trigger | Timing effect |
+| --- | --- |
+| Successful Start | Normal mode; first sequence already sent; next due after interval. |
+| Enable Smart Mode | Cancel normal schedule, initialize monitor, begin fresh idle countdown. |
+| Observed input | Cancel prior eligible deadline; last activity advances. No injection while any key/button is held. |
+| All held input released | Begin full idle interval after the final release. |
+| Idle deadline | Recheck eligibility; send selected batch; schedule one further interval. |
+| Disable Smart Mode | Stop monitor; next normal event one full interval later; no immediate sequence. |
+| Changed interval | Restart normal schedule or Smart idle countdown using new interval. |
+| Changed key only | Replace next batch selection without independent timing reset. |
+| Changed both | New interval deadline with new key. |
+| Unchanged Save, Cancel, invalid Save | No settings-driven timing change. User interaction still resets Smart idle timing. |
+
+Validate and commit Settings atomically. Defaults at launch: 5 minutes, F15, Smart Mode off, Stopped. No settings persistence. Input that arrives during a submitted batch takes effect immediately afterward; do not introduce sleeps between Scroll Lock presses. Preserve the real input timestamp and held state when recalculating idle eligibility.
+
+### 12.7 Session, power, and shutdown (BUG-002)
+
+Proposed Windows integration: register for current-session lock/unlock notifications and process suspend/resume and session-end messages through the Qt native event integration or a dedicated native message window. Validate notification delivery in both folder and single-file packages. Handle lock and suspend by invoking centralized Stop. Unlock/resume defensively retain Stopped and never replay missed deadlines. Shutdown/restart cancels activity, removes monitoring and UI, releases native resources, and exits without vetoing or delaying shutdown. Do not modify power settings or register startup behavior.
+
+Native event ordering can race with queued timer callbacks: invalidate work before teardown and recheck state before submission. Complete already-submitted batches without launching later sequences. Teardown must be idempotent and bounded, including when already Stopped/Error. Pair every registration with cleanup. Hard process termination cannot guarantee cleanup; never claim otherwise.
+
+### 12.8 Tray, Settings, and About (CHG-001/002/003)
+
+Menu: Start, Stop, Settings, About, Exit, with separators as useful. About is immediately above Exit. Smart Mode is deferred from 0.2.0. Settings exposes only interval and key selection. Keep distinct Running/Stopped/Error icons; no Activity field.
+
+Use the four 0.2.0 tooltip fields in PRD 12.3 (Status, Interval, Key, and Last keypress), with concise appended warning/error reason. Refresh on status, interval, key, success, and warning changes. Validate native tooltip length/rendering; do not let a long diagnostic hide essential status/error information. A startup failure or partial submission must not display a misleading three-failure message.
+
+About uses a single reusable dialog, OK, the approved description (subject to DOC-001), and a shared application version source that also drives packaging metadata. Verify the bundled version without assuming installed package metadata exists. Opening dialogs must not block activity scheduling or change status.
+
+### 12.9 Verification and release evidence
+
+Use mocked adapters, fake monotonic time, and controllable monitor/system events for deterministic logic tests. Cover all result counts, no false success on cleanup, Start failure, error retry, settings atomicity, deadline boundaries, held input, self-input exclusion, stale callbacks, and repeated teardown. Keep real input out of unit tests.
+
+Record Windows 11 integration evidence for both keys, simultaneous launch/crash recovery, lock/unlock, sleep/resume, hibernate/resume where supported, and shutdown/restart. Test standard-user operation and full tooltip/About rendering. Smart Mode monitoring and its feasibility matrix are deferred to a future release. Record Windows 10 as unverified for 0.2.0 and record other unsupported environmental cases explicitly rather than marking them passed.
+
+Build and test folder packaging before single-file packaging. Record exact Python, PySide6, PyInstaller, OS builds, artifact identity/hash, and test commands/results. Keep source compatibility at Python >=3.11 and use Python 3.13.6, PySide6 6.11.0, and PyInstaller 6.21.0 for the reproducible 0.2.0 release build. Create version-specific evidence under docs/releases/0.2.0 during verification. README is updated when behavior is implemented; do not publish planned features as currently available.

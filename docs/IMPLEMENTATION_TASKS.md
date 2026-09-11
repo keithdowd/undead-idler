@@ -8,6 +8,8 @@ Status values:
 - `[-]` In progress
 - `[x]` Complete
 
+Release scope: Phases 1-7 and their dependency summary below are the preserved 0.1.0 MVP record. New work is in [Release 0.2.0](#release-020-planned-implementation), based on [PRD section 12](PRD.md#12-planned-020-requirements), [technical section 12](TECHNICAL_REQUIREMENTS.md#12-planned-020-design), and the [release plan](releases/0.2.0/RELEASE_PLAN.md). Completed MVP tasks do not imply the planned release has been implemented or tested.
+
 ## Phase 1: Project Foundation
 
 ### UI-001 Create Python project metadata
@@ -383,3 +385,149 @@ Project foundation
 ```
 
 The custom icon task can proceed in parallel with the input adapter and activity controller, but it must be complete before final packaging.
+
+## Release 0.2.0: Planned implementation
+
+All tasks below are not started. Dependencies reference new tasks; the completed MVP is the baseline. Scope IDs refer to [RELEASE_PLAN.md](releases/0.2.0/RELEASE_PLAN.md). Follow the existing per-task implementation/commit workflow; these documentation edits do not authorize starting development.
+
+### V020-001 Prevent duplicate instances
+
+- Status: `[ ]`
+- Dependencies: None (MVP baseline).
+- Scope: BUG-001; PRD 12.2; technical 12.2.
+- Add an atomic per-user/session instance guard before UI or input initialization; release resources at exit.
+- Silently reject duplicates without changing the original instance.
+- Validate sequential and simultaneous launch, original status/interval preservation, clean exit, and crash/relaunch behavior.
+
+Completion criteria: exactly one tray/input owner exists per session; later legitimate launches are not blocked by stale state. Packaged validation also runs in V020-012.
+
+### V020-002 Implement explicit error policy and warnings
+
+- Status: `[ ]`
+- Dependencies: V020-001.
+- Scope: BUG-003; PRD 12.8; technical 12.4.
+- Support Stopped -> Error on initial failure and normal-mode retry from Error.
+- Define full/zero/partial result handling, centralized Error cleanup, warnings for Running failures 1/2, and automatic Error at 3.
+- Keep the timestamp unchanged on failure and reset counts only on success, explicit Stop, or a fresh Start.
+- Test initial failure/retry, successful reset, all thresholds, timestamp preservation, and truthful tooltip reasons with mocked results. Native partial cleanup follows in V020-004.
+
+Completion criteria: errors are visible at every stage; no retry timer survives Error, and no message incorrectly claims three failures for another cause.
+
+### V020-003 Add key selection and complete sequences
+
+- Status: `[ ]`
+- Dependencies: V020-002.
+- Scope: FEAT-001; PRD 12.5; technical 12.3/12.6.
+- Add a session-only F15/Scroll Lock enum with F15 launch default; extend Settings without adding Smart Mode.
+- Submit one tagged batch of 2 F15 events or 4 Scroll Lock events for Start and timer events.
+- Validate/apply Settings atomically; preserve scheduling for key-only/unchanged Save, reset for interval changes, and preserve values on Cancel/invalid input.
+- Test event order/count/marker, defaults, invalid selections, settings transactions, and normal-mode scheduling.
+
+Completion criteria: both keys are selectable and full success requires the complete batch; no persistence or extra keypress results from saving settings.
+
+### V020-004 Validate and implement partial-input cleanup
+
+- Status: `[ ]`
+- Dependencies: V020-003.
+- Scope: BUG-003, FEAT-001; PRD 12.8; technical 12.3; TECH-002.
+- Validate what partial return counts establish and design bounded best-effort release of a potentially held simulated key.
+- Never blindly replay or toggle; report immediate Error and Scroll Lock state uncertainty when applicable.
+- Test every partial count for both keys, cleanup failure, no success timestamp/count reset, and no retry loop. Record controlled native validation limits.
+
+Completion criteria: TECH-002 is resolved in technical requirements; partial submission is distinct from zero-event failure and cannot silently leave activity running.
+
+### V020-005 Handle session and power transitions
+
+- Status: `[ ]`
+- Dependencies: V020-004.
+- Scope: BUG-002; PRD 12.7; technical 12.7.
+- Integrate session/power/shutdown notifications with centralized Stop and resource cleanup.
+- Invalidate pending callbacks; remain Stopped after unlock/resume; never replay elapsed intervals.
+- Test repeated notifications, Stopped/Running/Error inputs, queued timer races, and bounded shutdown.
+
+Completion criteria: lock/suspend prevents future sequences; resume never auto-starts; shutdown is not vetoed or delayed. Native lifecycle matrix is verified in V020-012.
+
+## Deferred future implementation: Smart Mode
+
+FEAT-002 and all Smart Mode feasibility work are deferred from 0.2.0. The tasks below are retained as a future-release starting point and are not part of the 0.2.0 dependency graph or release acceptance.
+
+### SMART-001 Validate Smart Mode monitoring feasibility
+
+- Status: `Deferred`
+- Dependencies: V020-001 and the completed 0.2.0 baseline.
+- Scope: FEAT-002; PRD 12.6; technical 12.5; TECH-001.
+- Evaluate the simplified v1 monitor: dedicated-thread hooks, own-event markers, keyboard/mouse/scrolling, key/button holds at enable, clean start/stop, packaged standard-user operation, and callback latency.
+- Confirm UI responsiveness and document hook limitations without building Raw Input fallback, automatic recovery, remote-session support, extra device classes, or monitoring telemetry.
+- Record findings and the chosen v1 approach in technical requirements without claiming guaranteed detection of every hook loss.
+
+Completion criteria: future-release task; TECH-001 has an evidence-backed implementation approach before Smart Mode production work begins.
+
+SMART-001 acceptance evidence must cover monitor startup/failure, keyboard activity, mouse movement and buttons, vertical and horizontal scrolling, held-input suppression through final release, own F15/Scroll Lock exclusion, other observed input, clean stop and stale-callback rejection, UI responsiveness, and packaged standard-user Windows 11 operation. Raw Input fallback, automatic recovery, remote sessions, extra device classes, and telemetry are deferred from this gate.
+
+### SMART-002 Implement Smart Mode activity monitor
+
+- Status: `Deferred`
+- Dependencies: SMART-001.
+- Scope: FEAT-002; PRD 12.6; technical 12.5.
+- Implement validated monitoring with thread-safe activity/held-state delivery, own-input exclusion, minimal transient data, and teardown.
+- Include keyboard down/up, mouse movement/buttons, vertical/horizontal scroll, and held-state initialization/reconciliation.
+- Test repeat-down, final release, initialization failure, self-input versus other injected input, coalescing, and stale events after teardown. Do not log typed input.
+
+Completion criteria: activity signals preserve idle/held semantics and monitoring starts/stops reliably without blocking UI or suppressing user input.
+
+### SMART-003 Implement Smart Mode timing and tray toggle
+
+- Status: `Deferred`
+- Dependencies: SMART-002.
+- Scope: FEAT-002, BUG-002, BUG-003; PRD 12.6-12.8; technical 12.4-12.7.
+- Add checkable tray-only Smart Mode, available only while Running; successful Start always begins normal mode.
+- Implement shared-interval idle/repeat timing, fresh enable/disable deadlines, held-input suppression, settings semantics, and dispatch eligibility checks.
+- Connect Stop/Error/system events to cancel timing, remove monitoring, uncheck/disable the option, and discard stale callbacks.
+- Test boundary input, mode switches, all settings combinations, canceled-dialog user activity, holds, input during batches, failure count across activity pauses, and no automatic resume.
+
+Completion criteria: deterministic fake-clock tests demonstrate all PRD Smart Mode cases; waiting retains Running status and creates no extra public state.
+
+### V020-009 Finish status and tooltip presentation
+
+- Status: `[ ]`
+- Dependencies: V020-003, V020-005.
+- Scope: CHG-001, CHG-003; PRD 12.3; technical 12.8.
+- Show Status, Interval, Key, and Last keypress; no Smart Mode or Activity line in 0.2.0.
+- Preserve Running/Stopped/Error icons and refresh after every relevant change; append concise truthful warnings/reasons.
+- Test all statuses, keys/modes, None/time formatting, and error variants; verify native tooltip readability/length during release checks.
+
+Completion criteria: no user-facing State label remains in the affected tray display and required fields stay readable.
+
+### V020-010 Add About and shared version metadata
+
+- Status: `[ ]`
+- Dependencies: None (MVP baseline); resolve DOC-001 before completion. Independent UI task.
+- Scope: CHG-002; PRD 12.4; technical 12.8.
+- Resolve About description wording, add the action immediately above Exit, and implement a reusable dialog with OK.
+- Use one application version source shared with packaging; do not hardcode a separate dialog version.
+- Test repeated opening, all statuses, no activity interruption, and version consistency; verify bundled display in V020-012.
+
+Completion criteria: approved copy and actual version appear in one dialog; behavior/settings remain unchanged except normal Smart activity detection of user interaction.
+
+### V020-011 Complete regression checks and user documentation
+
+- Status: `[ ]`
+- Dependencies: V020-009, V020-010.
+- Scope: All approved 0.2.0 items; PRD 12.9; technical 12.9.
+- Run the full automated suite and resolve regressions without real input in unit tests.
+- Update README for implemented tray operations, both keys, errors, session/power behavior, and limitations; identify Smart Mode as deferred and reconcile old platform claims with actual evidence.
+- Check scope-to-test coverage and links; preserve historical MVP tasks and release records.
+
+Completion criteria: automated regression suite passes and user instructions accurately describe implemented 0.2.0 behavior.
+
+### V020-012 Package and verify release 0.2.0
+
+- Status: `[ ]`
+- Dependencies: V020-011.
+- Scope: All approved 0.2.0 items; PRD 12.9; technical 12.9; TECH-003.
+- Record exact build dependencies/runtime; reconcile metadata and legacy version requirements, then validate folder and single-file packages.
+- Execute the Windows 11 standard-user matrix for both keys, duplicate launches and crash recovery, system transitions, errors, tooltip, and About. Record Smart Mode as deferred and Windows 10 as unverified for this release.
+- Create RELEASE_CHECKLIST.md, QA_WINDOWS_INTEGRATION.md, and QA_SUPPORTED_WINDOWS.md in docs/releases/0.2.0 with actual results, environment, commands, artifact hash, and limitations; no copied pass claims.
+- Archive executable and matching build metadata without overwriting 0.1.0 evidence. Verify no-console/no-Python operation, no startup registration/network/telemetry/power changes, and actual bundled version.
+
+Completion criteria: release readiness in [RELEASE_PLAN.md](releases/0.2.0/RELEASE_PLAN.md) is demonstrated, all required cases are resolved, and TECH-003 is closed. Packaging/verification does not itself publish a release.
